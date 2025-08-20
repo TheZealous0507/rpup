@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>群组 - 膳衡方程式</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-dark: #3a56d4;
+            --primary-light: #edf2ff;
+            --secondary-color: #3f37c9;
+            --accent-color: #4cc9f0;
+            --dark-color: #35424a;
+            --light-color: #f4f4f4;
+            --success-color: #4caf50;
+            --danger-color: #f44336;
+            --warning-color: #ff9800;
+            --info-color: #2196f3;
+            --border-color: #ddd;
+            --text-color: #333;
+            --text-light: #777;
+            --shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --pulse-animation: pulse 2s infinite;
+            --bounce-animation: bounce 2s infinite;
+            --float-animation: float 3s ease-in-out infinite;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .search-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .search-form {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .search-input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        .groups-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .group-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        
+        .group-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        .group-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.5rem;
+        }
+        
+        .group-title {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .group-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .group-content {
+            padding: 1.5rem;
+        }
+        
+        .group-description {
+            color: #666;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+        
+        .group-stats {
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1rem;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 0.9rem;
+        }
+        
+        .create-form {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: none;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .no-groups {
+            text-align: center;
+            padding: 3rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+        }
+        
+        .no-groups i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <div class="navbar-container">
+                <a href="{% url 'FoodApp:index' %}" class="logo">
+                    <i class="fas fa-utensils logo-icon"></i>
+                    膳衡方程式
+                </a>
+                
+                <ul class="nav-menu" id="navMenu">
+                    <li class="nav-item">
+                        <a href="{% url 'FoodApp:index' %}" class="nav-link"><i class="fas fa-home"></i> 首页</a>
+                    </li>
+                    
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link"><i class="fas fa-utensils"></i> 饮食追踪 <i class="fas fa-chevron-down" style="font-size: 0.8rem; margin-left: 0.5rem;"></i></a>
+                        <div class="dropdown-content">
+                            <a href="{% url 'FoodApp:food_search' %}"><i class="fas fa-search"></i> 食物查询</a>
+                            <a href="{% url 'FoodApp:food_image_recognition' %}"><i class="fas fa-camera"></i> 图片识别</a>
+                            <a href="{% url 'FoodApp:add_meal' %}"><i class="fas fa-plus-circle"></i> 添加餐食</a>
+                            <a href="{% url 'FoodApp:nutrition_analysis' %}"><i class="fas fa-chart-pie"></i> 营养分析</a>
+                            <a href="{% url 'FoodApp:recipe_suggestion' %}"><i class="fas fa-book"></i> 食谱推荐</a>
+                            <a href="{% url 'FoodApp:meal_suggestion' %}"><i class="fas fa-lightbulb"></i> 膳食建议</a>
+                            <a href="{% url 'FoodApp:add_food' %}"><i class="fas fa-utensils"></i> 添加食物</a>
+                        </div>
+                    </li>
+                    
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link"><i class="fas fa-users"></i> 社区互动 <i class="fas fa-chevron-down" style="font-size: 0.8rem; margin-left: 0.5rem;"></i></a>
+                        <div class="dropdown-content">
+                            <a href="{% url 'FoodApp:groups' %}"><i class="fas fa-users"></i> 群组</a>
+                            <a href="{% url 'FoodApp:health_challenges' %}"><i class="fas fa-trophy"></i> 健康挑战</a>
+                            <a href="{% url 'FoodApp:activity_diary' %}"><i class="fas fa-calendar-alt"></i> 活动日记</a>
+                        </div>
+                    </li>
+                    
+                    {% if user_id %}
+                    <li class="nav-item nav-user">
+                        {% if avatar %}
+                            {{ avatar|safe }}
+                        {% else %}
+                            <div class="user-avatar" style="display: flex; align-items: center; justify-content: center; background: var(--accent-color);">
+                                <i class="fas fa-user" style="color: white;"></i>
+                            </div>
+                        {% endif %}
+                        <a href="{% url 'FoodApp:logout' %}" class="btn btn-outline">退出</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a href="{% url 'FoodApp:login' %}" class="btn">登录</a>
+                    </li>
+                    {% endif %}
+                </ul>
+                
+                <button class="mobile-toggle" id="mobileToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="page-title">
+            <h1><i class="fas fa-users"></i> 健康群组</h1>
+            <p>加入或创建群组，与志同道合的朋友一起追求健康生活</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message {{ message.tags }}"><i class="fas fa-info-circle"></i> {{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="page-header">
+            <h2>我创建的群组</h2>
+            <button class="btn" onclick="toggleCreateForm()">
+                <i class="fas fa-plus"></i> 创建群组
+            </button>
+        </div>
+
+        {% if created_groups %}
+        <div class="groups-grid">
+            {% for group in created_groups %}
+            <div class="group-card">
+                <div class="group-header">
+                    <h3 class="group-title">{{ group.group_name }}</h3>
+                    <div class="group-meta">
+                        <span><i class="fas fa-user"></i> 创建者: {{ group.creator_name }}</span>
+                    </div>
+                </div>
+                <div class="group-content">
+                    <p class="group-description">{{ group.description }}</p>
+                    <div class="group-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">{{ group.member_count }}</div>
+                            <div class="stat-label">成员</div>
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        <a href="{% url 'FoodApp:group_detail' group.id %}" class="btn btn-small">
+                            <i class="fas fa-eye"></i> 查看详情
+                        </a>
+                        <button class="btn btn-small btn-outline" disabled>
+                            <i class="fas fa-crown"></i> 群主
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-groups">
+            <i class="fas fa-crown"></i>
+            <h3>暂无创建的群组</h3>
+            <p>您还没有创建任何群组</p>
+        </div>
+        {% endif %}
+
+        <div class="page-header">
+            <h2>我加入的群组</h2>
+        </div>
+
+        {% if joined_groups %}
+        <div class="groups-grid">
+            {% for group in joined_groups %}
+            <div class="group-card">
+                <div class="group-header">
+                    <h3 class="group-title">{{ group.group_name }}</h3>
+                    <div class="group-meta">
+                        <span><i class="fas fa-user"></i> 创建者: {{ group.creator_name }}</span>
+                    </div>
+                </div>
+                <div class="group-content">
+                    <p class="group-description">{{ group.description }}</p>
+                    <div class="group-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">{{ group.member_count }}</div>
+                            <div class="stat-label">成员</div>
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        <a href="{% url 'FoodApp:group_detail' group.id %}" class="btn btn-small">
+                            <i class="fas fa-eye"></i> 查看详情
+                        </a>
+                        <a href="{% url 'FoodApp:leave_group' group.id %}" class="btn btn-small btn-outline" 
+                           onclick="return confirm('确定要离开这个群组吗？')">
+                            <i class="fas fa-sign-out-alt"></i> 离开群组
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-groups">
+            <i class="fas fa-users"></i>
+            <h3>暂无加入的群组</h3>
+            <p>您还没有加入任何群组</p>
+        </div>
+        {% endif %}
+
+        <div class="page-header">
+            <h2>所有群组</h2>
+        </div>
+
+        <div class="create-form" id="createGroupForm">
+            <h3><i class="fas fa-users"></i> 创建新群组</h3>
+            <form method="POST" action="{% url 'FoodApp:create_group' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="name">群组名称</label>
+                    <input type="text" id="name" name="name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="description">群组描述</label>
+                    <textarea id="description" name="description" class="form-control" required></textarea>
+                </div>
+                <button type="submit" class="btn"><i class="fas fa-plus-circle"></i> 创建群组</button>
+                <button type="button" class="btn btn-outline" onclick="toggleCreateForm()" style="margin-left: 0.5rem;">
+                    <i class="fas fa-times"></i> 取消
+                </button>
+            </form>
+        </div>
+
+        <div class="search-container">
+            <form class="search-form">
+                <input type="text" id="searchInput" class="search-input" placeholder="搜索群组..." onkeyup="searchGroups()">
+                <button type="button" class="btn"><i class="fas fa-search"></i> 搜索</button>
+            </form>
+        </div>
+
+        {% if groups %}
+        <div class="groups-grid">
+            {% for group in groups %}
+            <div class="group-card">
+                <div class="group-header">
+                    <h3 class="group-title">{{ group.name }}</h3>
+                    <div class="group-meta">
+                        <span><i class="fas fa-user"></i> 创建者: {{ group.creator_username }}</span>
+                    </div>
+                </div>
+                <div class="group-content">
+                    <p class="group-description">{{ group.description }}</p>
+                    <div class="group-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">{{ group.member_count }}</div>
+                            <div class="stat-label">成员</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">{{ group.challenge_count }}</div>
+                            <div class="stat-label">挑战</div>
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        <a href="{% url 'FoodApp:group_detail' group.id %}" class="btn btn-small">
+                            <i class="fas fa-eye"></i> 查看详情
+                        </a>
+                        {% if not group.is_member %}
+                        <a href="{% url 'FoodApp:join_group' group.id %}" class="btn btn-small btn-outline">
+                            <i class="fas fa-user-plus"></i> 加入群组
+                        </a>
+                        {% else %}
+                        <button class="btn btn-small btn-outline" disabled>
+                            <i class="fas fa-check"></i> 已加入
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-groups">
+            <i class="fas fa-users"></i>
+            <h3>暂无群组</h3>
+            <p>还没有创建任何群组</p>
+            <button class="btn" onclick="toggleCreateForm()" style="margin-top: 1rem;">
+                <i class="fas fa-plus"></i> 创建第一个群组
+            </button>
+        </div>
+        {% endif %}
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h3>膳衡方程式</h3>
+                    <p>您的个人健康饮食管理助手，致力于帮助每个人实现健康的生活方式。</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>核心功能</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'FoodApp:index' %}">首页</a></li>
+                        <li><a href="{% url 'FoodApp:food_search' %}">食物查询</a></li>
+                        <li><a href="{% url 'FoodApp:food_image_recognition' %}">图片识别</a></li>
+                        <li><a href="{% url 'FoodApp:add_meal' %}">添加餐食</a></li>
+                        <li><a href="{% url 'FoodApp:nutrition_analysis' %}">营养分析</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>智能推荐</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'FoodApp:recipe_suggestion' %}">食谱推荐</a></li>
+                        <li><a href="{% url 'FoodApp:meal_suggestion' %}">膳食建议</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>社区互动</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'FoodApp:groups' %}">群组</a></li>
+                        <li><a href="{% url 'FoodApp:health_challenges' %}">健康挑战</a></li>
+                        <li><a href="{% url 'FoodApp:activity_diary' %}">活动日记</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2025 膳衡方程式. 保留所有权利。</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 移动端菜单切换
+        const mobileToggle = document.getElementById('mobileToggle');
+        const navMenu = document.getElementById('navMenu');
+        
+        mobileToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+        
+        // 点击菜单项后关闭移动端菜单
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+            });
+        });
+        
+        // 点击头像跳转到个人主页
+        document.querySelectorAll('.user-avatar').forEach(avatar => {
+            avatar.addEventListener('click', () => {
+                window.location.href = "{% url 'FoodApp:profile' %}";
+            });
+        });
+        
+        // 添加下拉菜单功能
+        document.querySelectorAll('.dropdown > .nav-link').forEach(dropdownLink => {
+            dropdownLink.addEventListener('click', function(e) {
+                // 阻止链接的默认行为
+                e.preventDefault();
+                
+                // 获取当前下拉菜单的父元素
+                const dropdown = this.parentElement;
+                
+                // 切换当前下拉菜单的激活状态
+                dropdown.classList.toggle('active');
+                
+                // 关闭其他下拉菜单
+                document.querySelectorAll('.dropdown').forEach(otherDropdown => {
+                    if (otherDropdown !== dropdown) {
+                        otherDropdown.classList.remove('active');
+                    }
+                });
+            });
+        });
+        
+        // 点击页面其他地方时关闭下拉菜单
+        document.addEventListener('click', function(e) {
+            // 检查点击是否在下拉菜单内部
+            if (!e.target.closest('.dropdown')) {
+                // 关闭所有下拉菜单
+                document.querySelectorAll('.dropdown').forEach(dropdown => {
+                    dropdown.classList.remove('active');
+                });
+            }
+        });
+        
+        // 添加延迟显示子菜单的逻辑
+        document.querySelectorAll('.dropdown').forEach(dropdown => {
+            let timeoutId;
+            
+            dropdown.addEventListener('mouseenter', () => {
+                clearTimeout(timeoutId);
+                const dropdownContent = dropdown.querySelector('.dropdown-content');
+                if (dropdownContent) {
+                    dropdownContent.style.display = 'block';
+                    setTimeout(() => {
+                        dropdownContent.style.opacity = '1';
+                        dropdownContent.style.transform = 'translateY(0)';
+                    }, 50);
+                }
+            });
+            
+            dropdown.addEventListener('mouseleave', () => {
+                timeoutId = setTimeout(() => {
+                    const dropdownContent = dropdown.querySelector('.dropdown-content');
+                    if (dropdownContent) {
+                        dropdownContent.style.opacity = '0';
+                        dropdownContent.style.transform = 'translateY(-10px)';
+                        setTimeout(() => {
+                            dropdownContent.style.display = 'none';
+                        }, 300);
+                    }
+                }, 300);
+            });
+            
+            // 为子菜单添加事件监听器
+            const dropdownContent = dropdown.querySelector('.dropdown-content');
+            if (dropdownContent) {
+                dropdownContent.addEventListener('mouseenter', () => {
+                    clearTimeout(timeoutId);
+                });
+                
+                dropdownContent.addEventListener('mouseleave', () => {
+                    timeoutId = setTimeout(() => {
+                        dropdownContent.style.opacity = '0';
+                        dropdownContent.style.transform = 'translateY(-10px)';
+                        setTimeout(() => {
+                            dropdownContent.style.display = 'none';
+                        }, 300);
+                    }, 300);
+                });
+            }
+        });
+        
+        // 创建群组功能
+        function createGroup() {
+            const groupName = document.getElementById('group_name').value.trim();
+            const description = document.getElementById('description').value.trim();
+            
+            if (!groupName) {
+                alert('请输入群组名称');
+                return;
+            }
+            
+            // 发送创建群组请求
+            fetch("{% url 'FoodApp:create_group' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: `group_name=${encodeURIComponent(groupName)}&description=${encodeURIComponent(description)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 跳转到群组详情页面
+                    window.location.href = data.redirect_url;
+                } else {
+                    alert('创建群组失败: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('创建群组请求失败');
+            });
+        }
+    </script>
+</body>
+</html>

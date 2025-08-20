@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ group.group_name }} - 群组详情 - 膳衡方程式</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-dark: #3a56d4;
+            --primary-light: #edf2ff;
+            --secondary-color: #3f37c9;
+            --accent-color: #4cc9f0;
+            --dark-color: #35424a;
+            --light-color: #f4f4f4;
+            --success-color: #4caf50;
+            --danger-color: #f44336;
+            --warning-color: #ff9800;
+            --info-color: #2196f3;
+            --border-color: #ddd;
+            --text-color: #333;
+            --text-light: #777;
+            --shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --pulse-animation: pulse 2s infinite;
+            --bounce-animation: bounce 2s infinite;
+            --float-animation: float 3s ease-in-out infinite;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .group-info-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        
+        .group-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .group-title i {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-right: 1rem;
+        }
+        
+        .group-title h1 {
+            margin: 0;
+            color: var(--dark-color);
+        }
+        
+        .group-meta {
+            display: flex;
+            gap: 2rem;
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        
+        .group-description {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 15px 15px 0 0;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            border-top: 5px solid var(--primary-color);
+        }
+        
+        .tab {
+            padding: 1rem 2rem;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: var(--transition);
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .section {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .section-header i {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-right: 0.75rem;
+        }
+        
+        .section-header h2 {
+            margin: 0;
+            color: var(--dark-color);
+        }
+        
+        .members-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .member-card {
+            text-align: center;
+            padding: 1.5rem 1rem;
+            border-radius: 10px;
+            background: var(--light-color);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .member-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        .member-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            background: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: var(--primary-color);
+            overflow: hidden;
+        }
+        
+        .member-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            word-break: break-all;
+        }
+        
+        .member-role {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        
+        .role-admin {
+            background: var(--accent-color);
+            color: white;
+        }
+        
+        .role-member {
+            background: var(--primary-light);
+            color: var(--primary-color);
+        }
+        
+        .challenges-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .challenge-card {
+            background: var(--light-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: var(--transition);
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .challenge-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        .challenge-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .challenge-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            color: var(--primary-color);
+        }
+        
+        .challenge-name {
+            margin: 0;
+            font-size: 1.2rem;
+            color: var(--dark-color);
+        }
+        
+        .challenge-description {
+            color: #666;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+        
+        .challenge-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+        
+        .chat-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .message {
+            max-width: 70%;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            border-radius: 10px;
+            position: relative;
+        }
+        
+        .message.own {
+            align-self: flex-end;
+            background: var(--primary-color);
+            color: white;
+            border-bottom-right-radius: 0;
+        }
+        
+        .message.other {
+            align-self: flex-start;
+            background: var(--light-color);
+            border-bottom-left-radius: 0;
+        }
+        
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.25rem;
+            font-size: 0.85rem;
+        }
+        
+        .message.own .message-header {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .message.other .message-header {
+            color: #666;
+        }
+        
+        .message-username {
+            font-weight: 600;
+        }
+        
+        .message-time {
+            font-size: 0.75rem;
+        }
+        
+        .message-text {
+            line-height: 1.4;
+        }
+        
+        .chat-input {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .message-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .message-input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        /* 管理员功能样式 */
+        .admin-actions {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+        }
+        
+        .admin-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+        
+        .admin-btn:hover {
+            background: #d32f2f;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .edit-form {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            border: none;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        .member-actions {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .action-btn {
+            padding: 0.25rem 0.5rem;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: var(--transition);
+            border: none;
+        }
+        
+        .action-btn:hover {
+            opacity: 0.9;
+        }
+        
+        @media (max-width: 768px) {
+            .members-grid,
+            .challenges-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chat-container {
+                height: 400px;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+            
+            .admin-actions {
+                position: static;
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <div class="navbar-container">
+                <a href="{% url 'FoodApp:index' %}" class="logo">
+                    <i class="fas fa-utensils logo-icon"></i>
+                    膳衡方程式
+                </a>
+                
+                <ul class="nav-menu" id="navMenu">
+                    <li class="nav-item">
+                        <a href="{% url 'FoodApp:index' %}" class="nav-link"><i class="fas fa-home"></i> 首页</a>
+                    </li>
+                    
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link"><i class="fas fa-utensils"></i> 饮食追踪 <i class="fas fa-chevron-down" style="font-size: 0.8rem; margin-left: 0.5rem;"></i></a>
+                        <div class="dropdown-content">
+                            <a href="{% url 'FoodApp:food_search' %}"><i class="fas fa-search"></i> 食物查询</a>
+                            <a href="{% url 'FoodApp:food_image_recognition' %}"><i class="fas fa-camera"></i> 图片识别</a>
+                            <a href="{% url 'FoodApp:add_meal' %}"><i class="fas fa-plus-circle"></i> 添加餐食</a>
+                            <a href="{% url 'FoodApp:nutrition_analysis' %}"><i class="fas fa-chart-pie"></i> 营养分析</a>
+                            <a href="{% url 'FoodApp:recipe_suggestion' %}"><i class="fas fa-book"></i> 食谱推荐</a>
+                            <a href="{% url 'FoodApp:meal_suggestion' %}"><i class="fas fa-lightbulb"></i> 膳食建议</a>
+                            <a href="{% url 'FoodApp:add_food' %}"><i class="fas fa-utensils"></i> 添加食物</a>
+                        </div>
+                    </li>
+                    
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link"><i class="fas fa-users"></i> 社区互动 <i class="fas fa-chevron-down" style="font-size: 0.8rem; margin-left: 0.5rem;"></i></a>
+                        <div class="dropdown-content">
+                            <a href="{% url 'FoodApp:groups' %}" onclick="event.preventDefault(); location.href='{% url 'FoodApp:groups' %}';"><i class="fas fa-users"></i> 群组</a>
+                            <a href="{% url 'FoodApp:health_challenges' %}" onclick="event.preventDefault(); location.href='{% url 'FoodApp:health_challenges' %}';"><i class="fas fa-trophy"></i> 健康挑战</a>
+                            <a href="{% url 'FoodApp:activity_diary' %}" onclick="event.preventDefault(); location.href='{% url 'FoodApp:activity_diary' %}';"><i class="fas fa-calendar-alt"></i> 活动日记</a>
+                        </div>
+                    </li>
+                    
+                    {% if user_id %}
+                    <li class="nav-item nav-user">
+                        {% if avatar %}
+                            {{ avatar|safe }}
+                        {% else %}
+                            <div class="user-avatar" style="display: flex; align-items: center; justify-content: center; background: var(--accent-color);">
+                                <i class="fas fa-user" style="color: white;"></i>
+                            </div>
+                        {% endif %}
+                        <a href="{% url 'FoodApp:logout' %}" class="btn btn-outline">退出</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a href="{% url 'FoodApp:login' %}" class="btn">登录</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{% url 'FoodApp:register' %}" class="btn" style="margin-right: 10px;">注册</a>
+                    </li>
+                    {% endif %}
+                </ul>
+                
+                <button class="mobile-toggle" id="mobileToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="page-title">
+            <h1><i class="fas fa-users"></i> 群组详情</h1>
+            <p>查看和管理您的群组信息</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message {{ message.tags }}"><i class="fas fa-info-circle"></i> {{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="group-info-card">
+            <div class="group-title">
+                <i class="fas fa-users"></i>
+                <h1>{{ group.group_name }}</h1>
+            </div>
+            <div class="group-meta">
+                <span><i class="fas fa-user"></i> 创建者: {{ group.creator_name }}</span>
+                <span><i class="fas fa-calendar"></i> 创建时间: {{ group.created_at|date:"Y-m-d H:i" }}</span>
+                <span><i class="fas fa-users"></i> 成员数: {{ members|length }}</span>
+            </div>
+            <div class="group-description">
+                <p>{{ group.description|default:"暂无描述" }}</p>
+            </div>
+            
+            <!-- 管理员功能 -->
+            {% for member in members %}
+                {% if member.user_id == user_id and member.role == 'Admin' %}
+                <div class="admin-actions">
+                    <button class="admin-btn" onclick="toggleEditForm()" title="编辑群组信息">
+                        <i class="fas fa-edit"></i> 编辑群组
+                    </button>
+                </div>
+                {% endif %}
+            {% endfor %}
+            
+            <!-- 退出群组按钮 -->
+            <div class="admin-actions">
+                <form method="POST" action="{% url 'FoodApp:leave_group' group.id %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="button" class="admin-btn btn-danger" onclick="leaveGroup({{ group.id }})" title="退出群组">
+                        <i class="fas fa-sign-out-alt"></i> 退出群组
+                    </button>
+                </form>
+            </div>
+            
+            <!-- 编辑群组表单 -->
+            <div id="editForm" class="edit-form" style="display: none;">
+                <h3>编辑群组信息</h3>
+                <form method="POST" action="{% url 'FoodApp:update_group' group.id %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="group_name">群组名称</label>
+                        <input type="text" id="group_name" name="group_name" class="form-control" value="{{ group.group_name }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">群组描述</label>
+                        <textarea id="description" name="description" class="form-control" rows="3">{{ group.description|default:"" }}</textarea>
+                    </div>
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary" onclick="event.preventDefault(); this.form.submit();">
+                            <i class="fas fa-save"></i> 保存
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="toggleEditForm()" title="取消编辑">
+                            <i class="fas fa-times"></i> 取消
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('members')">成员</div>
+            <div class="tab" onclick="switchTab('chat')">讨论</div>
+        </div>
+
+        <div id="members" class="tab-content active">
+            <div class="section">
+                <div class="section-header">
+                    <i class="fas fa-users"></i>
+                    <h2>群组成员</h2>
+                </div>
+                <div class="members-grid">
+                    {% for member in members %}
+                    <div class="member-card">
+                        <div class="member-avatar">
+                            {% if member.avatar %}
+                                {% if member.avatar|slice:":1" == "&" %}
+                                    {{ member.avatar|safe }}
+                                {% else %}
+                                    <img src="/media/avatars/{{ member.avatar }}" alt="头像" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
+                                {% endif %}
+                            {% else %}
+                                <i class="fas fa-user"></i>
+                            {% endif %}
+                        </div>
+                        <div class="member-name">{{ member.username }}</div>
+                        <div class="member-role {% if member.role == 'Admin' %}role-admin{% else %}role-member{% endif %}">
+                            {% if member.role == 'Admin' %}管理员{% else %}成员{% endif %}
+                        </div>
+                        
+                        <!-- 管理员操作其他成员 -->
+                        {% for current_member in members %}
+                            {% if current_member.user_id == user_id and current_member.role == 'Admin' and member.user_id != user_id %}
+                            <div class="member-actions">
+                                {% if member.role != 'Admin' %}
+                                <form method="POST" action="{% url 'FoodApp:make_admin' group.id member.user_id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="button" class="action-btn btn-primary" onclick="makeAdmin({{ group.id }}, {{ member.user_id }})">
+                                        <i class="fas fa-user-shield"></i> 设为管理员
+                                    </button>
+                                </form>
+                                {% endif %}
+                                <form method="POST" action="{% url 'FoodApp:remove_member' group.id member.user_id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="action-btn btn-danger" onclick="return confirm('确定要将 {{ member.username }} 移出群组吗？')">
+                                        <i class="fas fa-user-times"></i> 移出群组
+                                    </button>
+                                </form>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div id="chat" class="tab-content">
+            <div class="chat-container">
+                <div class="chat-messages" id="chatMessages">
+                    {% for message in messages_list %}
+                    <div class="message {% if message.user_id == user_id %}own{% else %}other{% endif %}">
+                        <div class="message-header">
+                            <span class="message-username">{{ message.username }}</span>
+                            <span class="message-time">{{ message.created_at|date:"H:i" }}</span>
+                        </div>
+                        <div class="message-text">{{ message.message }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="chat-input">
+                    <input type="text" class="message-input" id="messageInput" placeholder="输入消息...">
+                    <button class="btn btn-primary" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 移动端菜单切换
+        document.getElementById('mobileToggle').addEventListener('click', function() {
+            document.querySelector('.nav-menu').classList.toggle('active');
+        });
+
+        // Tab切换功能
+        function switchTab(tabName) {
+            // 隐藏所有tab内容
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // 移除所有tab的active类
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 显示选中的tab内容
+            document.getElementById(tabName).classList.add('active');
+            
+            // 为选中的tab添加active类
+            event.target.classList.add('active');
+        }
+
+        // 切换编辑表单显示
+        function toggleEditForm() {
+            const form = document.getElementById('editForm');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // 发送消息
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            
+            if (message) {
+                // 发送AJAX请求
+                fetch("{% url 'FoodApp:send_group_message' group.id %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: 'message=' + encodeURIComponent(message)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // 清空输入框
+                        messageInput.value = '';
+                        
+                        // 添加新消息到聊天区域
+                        const chatMessages = document.getElementById('chatMessages');
+                        const newMessage = document.createElement('div');
+                        newMessage.className = 'message own';
+                        newMessage.innerHTML = `
+                            <div class="message-header">
+                                <span class="message-username">${data.username}</span>
+                                <span class="message-time">${data.time}</span>
+                            </div>
+                            <div class="message-text">${data.message}</div>
+                        `;
+                        chatMessages.appendChild(newMessage);
+                        
+                        // 滚动到底部
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    } else {
+                        alert('发送消息失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('发送消息失败');
+                });
+            }
+        }
+        
+        // 创建挑战
+        function createChallenge(groupId) {
+            // 跳转到创建挑战页面
+            window.location.href = `/create_challenge/${groupId}/`;
+        }
+        
+        // 离开群组
+        function leaveGroup(groupId) {
+            if (confirm('确定要离开这个群组吗？')) {
+                // 发送离开群组请求
+                fetch(`/groups/${groupId}/leave/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // 跳转到群组列表页面
+                        window.location.href = "{% url 'FoodApp:groups' %}";
+                    } else {
+                        alert('离开群组失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('离开群组请求失败');
+                });
+            }
+        }
+        
+        // 移除成员
+        function removeMember(groupId, userId) {
+            if (confirm('确定要移除这个成员吗？')) {
+                // 发送移除成员请求
+                fetch(`/groups/${groupId}/remove_member/${userId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // 刷新页面以显示更新后的信息
+                        location.reload();
+                    } else {
+                        alert('移除成员失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('移除成员请求失败');
+                });
+            }
+        }
+        
+        // 设置为管理员
+        function makeAdmin(groupId, userId) {
+            if (confirm('确定要将此成员设为管理员吗？')) {
+                // 发送设置管理员请求
+                fetch(`/groups/${groupId}/make_admin/${userId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // 刷新页面以显示更新后的信息
+                        location.reload();
+                    } else {
+                        alert('设置管理员失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('设置管理员请求失败');
+                });
+            }
+        }
+
+        // 回车发送消息
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // 页面加载完成后滚动到聊天底部
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        });
+
+        document.querySelectorAll('.dropdown').forEach(dropdown => {
+            let timeoutId;
+
+            dropdown.addEventListener('mouseenter', () => {
+                clearTimeout(timeoutId);
+                const dropdownContent = dropdown.querySelector('.dropdown-content');
+                if (dropdownContent) {
+                    dropdownContent.style.display = 'block';
+                    setTimeout(() => {
+                        dropdownContent.style.opacity = '1';
+                        dropdownContent.style.transform = 'translateY(0)';
+                    }, 50);
+                }
+            });
+
+            dropdown.addEventListener('mouseleave', () => {
+                timeoutId = setTimeout(() => {
+                    const dropdownContent = dropdown.querySelector('.dropdown-content');
+                    if (dropdownContent) {
+                        dropdownContent.style.opacity = '0';
+                        dropdownContent.style.transform = 'translateY(-10px)';
+                        setTimeout(() => {
+                            dropdownContent.style.display = 'none';
+                        }, 300);
+                    }
+                }, 300);
+            });
+        });
+    </script>
+</body>
+</html>

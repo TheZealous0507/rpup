@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>食物图片识别 - 膳衡方程式</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-dark: #3a56d4;
+            --primary-light: #edf2ff;
+            --secondary-color: #3f37c9;
+            --accent-color: #4cc9f0;
+            --dark-color: #35424a;
+            --light-color: #f4f4f4;
+            --success-color: #4caf50;
+            --danger-color: #f44336;
+            --warning-color: #ff9800;
+            --info-color: #2196f3;
+            --border-color: #ddd;
+            --text-color: #333;
+            --text-light: #777;
+            --shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --pulse-animation: pulse 2s infinite;
+            --bounce-animation: bounce 2s infinite;
+            --float-animation: float 3s ease-in-out infinite;
+        }
+        
+        .upload-section {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 10px;
+            padding: 3rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 1.5rem;
+        }
+        
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--primary-color);
+            background-color: var(--primary-light);
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .upload-text {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+        }
+        
+        .upload-hint {
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
+        
+        .preview-container {
+            display: none;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--light-color);
+            border-radius: 10px;
+        }
+        
+        .preview-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .preview-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .preview-name {
+            font-weight: 500;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .result-section {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: none;
+        }
+        
+        .result-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .result-title {
+            font-size: 1.8rem;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .confidence-high {
+            color: #28a745;
+            font-weight: 700;
+        }
+        
+        .confidence-medium {
+            color: #ffc107;
+            font-weight: 700;
+        }
+        
+        .confidence-low {
+            color: #dc3545;
+            font-weight: 700;
+        }
+        
+        .food-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .info-card {
+            background: var(--primary-light);
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            border-left: 4px solid var(--primary-color);
+            position: relative;
+        }
+        
+        .info-card i {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .info-label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--dark-color);
+        }
+        
+        .info-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.4rem 1rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            min-height: 32px;
+            transition: none;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-outline:hover {
+            background: white;
+            color: var(--primary-color);
+        }
+
+        .hidden {
+            display: none;
+        }
+        
+        .rank-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .rank-1 {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+        }
+        
+        .rank-2 {
+            background: linear-gradient(135deg, #C0C0C0, #A9A9A9);
+        }
+        
+        .rank-3 {
+            background: linear-gradient(135deg, #CD7F32, #A0522D);
+        }
+        
+        /* 美化操作按钮 */
+        .card-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 15px;
+            justify-content: center;
+        }
+        
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.4rem 1rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: none;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            min-height: 32px;
+        }
+        
+        .action-btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), #6a5af9);
+            color: white;
+        }
+        
+        .action-btn-outline {
+            background: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+        
+        /* 统一按钮样式 */
+        .preview-btn {
+            background: linear-gradient(135deg, var(--primary-color), #6a5af9);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px 5px;
+        }
+        
+        .preview-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+        }
+        
+        .preview-btn:active {
+            transform: translateY(-1px);
+        }
+        
+        .preview-btn i {
+            font-size: 1.2rem;
+        }
+        
+        .preview-btn-outline {
+            background: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            border-radius: 50px;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.2);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px 5px;
+        }
+        
+        .preview-btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+        }
+        
+        .preview-btn-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        
+        /* 保持原有悬停效果的按钮样式 */
+        .preview-btn:hover {
+            background: linear-gradient(135deg, var(--primary-color), #6a5af9);
+        }
+        
+        .preview-btn-outline:hover {
+            background: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <div class="navbar-container">
+                <a href="{% url 'FoodApp:index' %}" class="logo">
+                    <i class="fas fa-utensils logo-icon"></i>
+                    膳衡方程式
+                </a>
+                
+                <ul class="nav-menu" id="navMenu">
+                    <li class="nav-item">
+                        <a href="{% url 'FoodApp:index' %}" class="nav-link"><i class="fas fa-home"></i> 首页</a>
+                    </li>
+                    
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link"><i class="fas fa-utensils"></i> 饮食追踪 <i class="fas fa-chevron-down" style="font-size: 0.8rem; margin-left: 0.5rem;"></i></a>
+                        <div class="dropdown-content">
+                            <a href="{% url 'FoodApp:food_search' %}"><i class="fas fa-search"></i> 食物查询</a>
+                            <a href="{% url 'FoodApp:food_image_recognition' %}"><i class="fas fa-camera"></i> 图片识别</a>
+                            <a href="{% url 'FoodApp:add_meal' %}"><i class="fas fa-plus-circle"></i> 添加餐食</a>
+                            <a href="{% url 'FoodApp:nutrition_analysis' %}"><i class="fas fa-chart-pie"></i> 营养分析</a>
+                            <a href="{% url 'FoodApp:recipe_suggestion' %}"><i class="fas fa-book"></i> 食谱推荐</a>
+                            <a href="{% url 'FoodApp:meal_suggestion' %}"><i class="fas fa-lightbulb"></i> 膳食建议</a>
+                            <a href="{% url 'FoodApp:add_food' %}"><i class="fas fa-utensils"></i> 添加食物</a>
+                        </div>
+                    </li>
+                    
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link"><i class="fas fa-users"></i> 社区互动 <i class="fas fa-chevron-down" style="font-size: 0.8rem; margin-left: 0.5rem;"></i></a>
+                        <div class="dropdown-content">
+                            <a href="{% url 'FoodApp:groups' %}"><i class="fas fa-users"></i> 群组</a>
+                            <a href="{% url 'FoodApp:health_challenges' %}"><i class="fas fa-trophy"></i> 健康挑战</a>
+                            <a href="{% url 'FoodApp:activity_diary' %}"><i class="fas fa-calendar-alt"></i> 活动日记</a>
+                        </div>
+                    </li>
+                    
+                    {% if user_id %}
+                    <li class="nav-item nav-user">
+                        {% if avatar %}
+                            {{ avatar|safe }}
+                        {% else %}
+                            <div class="user-avatar" style="display: flex; align-items: center; justify-content: center; background: var(--accent-color);">
+                                <i class="fas fa-user" style="color: white;"></i>
+                            </div>
+                        {% endif %}
+                        <a href="{% url 'FoodApp:logout' %}" class="btn btn-outline">退出</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a href="{% url 'FoodApp:login' %}" class="btn">登录</a>
+                    </li>
+                    {% endif %}
+                </ul>
+                
+                <button class="mobile-toggle" id="mobileToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-content">
+        <div class="container">
+            <div class="page-title">
+                <h1><i class="fas fa-camera"></i> 食物图片识别</h1>
+                <p>上传食物图片，自动识别食物并获取营养信息</p>
+            </div>
+
+
+            <div class="upload-section">
+                <form method="POST" enctype="multipart/form-data" id="uploadForm">
+                    {% csrf_token %}
+                    <div id="uploadArea" class="upload-area">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="upload-text">点击选择图片或拖拽图片到此处</div>
+                        <div class="upload-hint">支持 JPG、PNG 格式，文件大小不超过 5MB</div>
+                        <button type="button" id="selectButton" class="btn">
+                            <i class="fas fa-folder-open"></i> 选择图片
+                        </button>
+                        <input type="file" id="fileInput" name="food_image" accept="image/*" style="display: none;">
+                    </div>
+                    
+                    <div id="previewContainer" class="preview-container">
+                        <div class="preview-info">
+                            <div class="preview-name" id="previewName"></div>
+                        </div>
+                        <img id="previewImage" class="preview-image" src="" alt="预览图片">
+                        <div class="preview-btn-container">
+                            <button type="button" id="resetButton" class="preview-btn-outline">
+                                <i class="fas fa-times"></i> 重新选择
+                            </button>
+                            <button type="submit" id="uploadButton" class="preview-btn">
+                                <i class="fas fa-paper-plane"></i> 上传识别
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div id="resultContainer" class="result-section" {% if not top_results %}style="display: none;"{% endif %}>
+                <div class="result-header">
+                    <h2 class="result-title">识别结果</h2>
+                    <p>以下是置信度排名前三的识别结果</p>
+                </div>
+                
+                {% if top_results %}
+                <div class="food-info">
+                    {% for result in top_results %}
+                    <div class="info-card">
+                        <div class="rank-badge rank-{{ result.rank }}">{{ result.rank }}</div>
+                        <i class="fas fa-utensils"></i>
+                        <div class="info-label">食物名称</div>
+                        <div class="info-value">{{ result.food_name }}</div>
+                        <div class="info-label">识别置信度</div>
+                        <div class="info-value {% if result.confidence > 80 %}confidence-high{% elif result.confidence > 50 %}confidence-medium{% else %}confidence-low{% endif %}">
+                            {{ result.confidence|floatformat:1 }}%
+                        </div>
+                        <div class="info-label">热量信息</div>
+                        <div class="info-value">{{ result.calorie }}{% if result.calorie != '未知' %} 千卡/100g{% endif %}</div>
+                        <div class="card-actions">
+                            <a href="{% url 'FoodApp:recipe_suggestion' %}?dish_name={{ result.food_name }}" class="action-btn action-btn-outline">
+                                <i class="fas fa-book"></i> 食谱推荐
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="no-results">
+                    <i class="fas fa-info-circle"></i>
+                    <p>上传图片进行食物识别</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            {% if top_results %}
+            <script>
+                // 显示识别结果
+                document.getElementById('resultContainer').style.display = 'block';
+                // 隐藏上传区域
+                document.getElementById('previewContainer').style.display = 'none';
+            </script>
+            {% endif %}
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h3>膳衡方程式</h3>
+                    <p>您的个人健康饮食管理助手，致力于帮助每个人实现健康的生活方式。</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>核心功能</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'FoodApp:index' %}">首页</a></li>
+                        <li><a href="{% url 'FoodApp:food_search' %}">食物查询</a></li>
+                        <li><a href="{% url 'FoodApp:food_image_recognition' %}">图片识别</a></li>
+                        <li><a href="{% url 'FoodApp:add_meal' %}">添加餐食</a></li>
+                        <li><a href="{% url 'FoodApp:nutrition_analysis' %}">营养分析</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>智能推荐</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'FoodApp:recipe_suggestion' %}">食谱推荐</a></li>
+                        <li><a href="{% url 'FoodApp:meal_suggestion' %}">膳食建议</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>社区互动</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'FoodApp:groups' %}">群组</a></li>
+                        <li><a href="{% url 'FoodApp:health_challenges' %}">健康挑战</a></li>
+                        <li><a href="{% url 'FoodApp:activity_diary' %}">活动日记</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2025 膳衡方程式. 保留所有权利。</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 移动端菜单切换
+        const mobileToggle = document.getElementById('mobileToggle');
+        const navMenu = document.getElementById('navMenu');
+        
+        mobileToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+        
+        // 点击菜单项后关闭移动端菜单
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+            });
+        });
+        
+        // 点击头像跳转到个人主页
+        document.querySelectorAll('.user-avatar').forEach(avatar => {
+            avatar.addEventListener('click', () => {
+                window.location.href = "{% url 'FoodApp:profile' %}";
+            });
+        });
+        
+        // 添加下拉菜单功能
+        document.querySelectorAll('.dropdown > .nav-link').forEach(dropdownLink => {
+            dropdownLink.addEventListener('click', function(e) {
+                // 阻止链接的默认行为
+                e.preventDefault();
+                
+                // 获取当前下拉菜单的父元素
+                const dropdown = this.parentElement;
+                
+                // 切换当前下拉菜单的激活状态
+                dropdown.classList.toggle('active');
+                
+                // 关闭其他下拉菜单
+                document.querySelectorAll('.dropdown').forEach(otherDropdown => {
+                    if (otherDropdown !== dropdown) {
+                        otherDropdown.classList.remove('active');
+                    }
+                });
+            });
+        });
+        
+        // 点击页面其他地方时关闭下拉菜单
+        document.addEventListener('click', function(e) {
+            // 检查点击是否在下拉菜单内部
+            if (!e.target.closest('.dropdown')) {
+                // 关闭所有下拉菜单
+                document.querySelectorAll('.dropdown').forEach(dropdown => {
+                    dropdown.classList.remove('active');
+                });
+            }
+        });
+        
+        // 添加延迟显示子菜单的逻辑
+        document.querySelectorAll('.dropdown').forEach(dropdown => {
+            let timeoutId;
+            
+            dropdown.addEventListener('mouseenter', () => {
+                clearTimeout(timeoutId);
+                const dropdownContent = dropdown.querySelector('.dropdown-content');
+                if (dropdownContent) {
+                    dropdownContent.style.display = 'block';
+                    setTimeout(() => {
+                        dropdownContent.style.opacity = '1';
+                        dropdownContent.style.transform = 'translateY(0)';
+                    }, 50);
+                }
+            });
+            
+            dropdown.addEventListener('mouseleave', () => {
+                timeoutId = setTimeout(() => {
+                    const dropdownContent = dropdown.querySelector('.dropdown-content');
+                    if (dropdownContent) {
+                        dropdownContent.style.opacity = '0';
+                        dropdownContent.style.transform = 'translateY(-10px)';
+                        setTimeout(() => {
+                            dropdownContent.style.display = 'none';
+                        }, 300);
+                    }
+                }, 300);
+            });
+            
+            // 为子菜单添加事件监听器
+            const dropdownContent = dropdown.querySelector('.dropdown-content');
+            if (dropdownContent) {
+                dropdownContent.addEventListener('mouseenter', () => {
+                    clearTimeout(timeoutId);
+                });
+                
+                dropdownContent.addEventListener('mouseleave', () => {
+                    timeoutId = setTimeout(() => {
+                        dropdownContent.style.opacity = '0';
+                        dropdownContent.style.transform = 'translateY(-10px)';
+                        setTimeout(() => {
+                            dropdownContent.style.display = 'none';
+                        }, 300);
+                    }, 300);
+                });
+            }
+        });
+        
+        // 文件上传相关功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const selectButton = document.getElementById('selectButton');
+            const previewContainer = document.getElementById('previewContainer');
+            const previewImage = document.getElementById('previewImage');
+            const previewName = document.getElementById('previewName');
+            const uploadButton = document.getElementById('uploadButton');
+            const resetButton = document.getElementById('resetButton');
+            const newRecognition = document.getElementById('newRecognition');
+            
+            // 点击选择按钮
+            selectButton.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            // 点击上传区域
+            uploadArea.addEventListener('click', (e) => {
+                if (e.target !== selectButton) {
+                    fileInput.click();
+                }
+            });
+            
+            // 文件选择后预览
+            fileInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const file = this.files[0];
+                    
+                    // 检查文件类型
+                    if (!file.type.startsWith('image/')) {
+                        alert('请选择有效的图片文件');
+                        return;
+                    }
+                    
+                    // 检查文件大小
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert('图片文件大小不能超过5MB');
+                        return;
+                    }
+                    
+                    // 显示预览
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImage.src = e.target.result;
+                        previewName.textContent = file.name;
+                        previewContainer.style.display = 'block';
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // 重置上传区域
+            resetButton.addEventListener('click', () => {
+                fileInput.value = '';
+                previewContainer.style.display = 'none';
+                uploadArea.style.borderColor = '#dee2e6';
+                uploadArea.style.backgroundColor = 'transparent';
+            });
+            
+            // 新识别按钮
+            if (newRecognition) {
+                newRecognition.addEventListener('click', () => {
+                    resetButton.click();
+                });
+            }
+            
+            // 拖拽上传功能
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                    const file = e.dataTransfer.files[0];
+                    
+                    // 检查文件类型
+                    if (!file.type.startsWith('image/')) {
+                        alert('请选择有效的图片文件');
+                        return;
+                    }
+                    
+                    // 检查文件大小
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert('图片文件大小不能超过5MB');
+                        return;
+                    }
+                    
+                    // 设置文件到input
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    fileInput.files = dataTransfer.files;
+                    
+                    // 显示预览
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImage.src = e.target.result;
+                        previewName.textContent = file.name;
+                        previewContainer.style.display = 'block';
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

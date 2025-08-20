@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>创建群组 - FoodApp</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-dark: #3a56d4;
+            --primary-light: #edf2ff;
+            --secondary-color: #3f37c9;
+            --accent-color: #4cc9f0;
+            --dark-color: #35424a;
+            --light-color: #f4f4f4;
+            --success-color: #4caf50;
+            --danger-color: #f44336;
+            --warning-color: #ff9800;
+            --info-color: #2196f3;
+            --border-color: #ddd;
+            --text-color: #333;
+            --text-light: #777;
+            --shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --pulse-animation: pulse 2s infinite;
+            --bounce-animation: bounce 2s infinite;
+            --float-animation: float 3s ease-in-out infinite;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #35424a 0%, #2c3e50 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 3px solid var(--primary-color);
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .logo span {
+            color: var(--primary-color);
+        }
+
+        .logo-icon {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-left: 1.5rem;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        nav ul li a i {
+            margin-right: 5px;
+        }
+
+        nav ul li a:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        nav ul li a:hover:before {
+            left: 100%;
+        }
+
+        nav ul li a:hover {
+            background-color: rgba(232, 73, 29, 0.3);
+            transform: translateY(-3px);
+        }
+
+        .page-title {
+            text-align: center;
+            margin: 30px 0;
+            color: var(--dark-color);
+        }
+
+        .page-title h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .page-title p {
+            color: #666;
+            font-size: 1.2rem;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .form-section {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 30px;
+            margin-bottom: 30px;
+            border-top: 5px solid var(--primary-color);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .section-header i {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-right: 15px;
+        }
+
+        .section-header h2 {
+            color: var(--secondary-color);
+            font-size: 1.8rem;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(232, 73, 29, 0.2);
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #495057);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .message {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 500;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .message.info {
+            background: linear-gradient(135deg, #d1ecf1, #a3d9e4);
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .message.error {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message.success {
+            background: linear-gradient(135deg, #d4edda, #a3d9b5);
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            nav ul {
+                margin-top: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            nav ul li {
+                margin: 5px;
+            }
+
+            .page-title h1 {
+                font-size: 2rem;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-utensils logo-icon"></i>
+                Food<span>App</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="{% url 'FoodApp:index' %}"><i class="fas fa-home"></i> 首页</a></li>
+                    <li><a href="{% url 'FoodApp:food_search' %}"><i class="fas fa-search"></i> 食物查询</a></li>
+                    <li><a href="{% url 'FoodApp:food_image_recognition' %}"><i class="fas fa-camera"></i> 图片识别</a></li>
+                    <li><a href="{% url 'FoodApp:groups' %}"><i class="fas fa-users"></i> 群组</a></li>
+                    <li><a href="{% url 'FoodApp:add_meal' %}"><i class="fas fa-plus-circle"></i> 添加餐食</a></li>
+                    <li><a href="{% url 'FoodApp:nutrition_analysis' %}"><i class="fas fa-chart-pie"></i> 营养分析</a></li>
+                    <li><a href="{% url 'FoodApp:calorie_calculator' %}"><i class="fas fa-calculator"></i> 卡路里计算</a></li>
+                    <li><a href="{% url 'FoodApp:diet_charts' %}"><i class="fas fa-chart-line"></i> 饮食图表</a></li>
+                    <li><a href="{% url 'FoodApp:meal_suggestion' %}"><i class="fas fa-utensils"></i> 餐食建议</a></li>
+                    {% if user_id %}
+                        <li><a href="{% url 'FoodApp:logout' %}"><i class="fas fa-sign-out-alt"></i> 退出 ({{ username }})</a></li>
+                    {% else %}
+                        <li><a href="{% url 'FoodApp:login' %}"><i class="fas fa-sign-in-alt"></i> 登录</a></li>
+                        <li><a href="{% url 'FoodApp:register' %}"><i class="fas fa-user-plus"></i> 注册</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="page-title">
+            <h1><i class="fas fa-plus-circle"></i> 创建群组</h1>
+            <p>创建一个新的群组，邀请朋友一起参与健康挑战</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message {{ message.tags }}"><i class="fas fa-info-circle"></i> {{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="form-section">
+            <div class="section-header">
+                <i class="fas fa-users"></i>
+                <h2>群组信息</h2>
+            </div>
+            
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="name"><i class="fas fa-tag"></i> 群组名称 *</label>
+                    <input type="text" id="name" name="name" class="form-control" required placeholder="请输入群组名称">
+                </div>
+                
+                <div class="form-group">
+                    <label for="description"><i class="fas fa-align-left"></i> 群组描述</label>
+                    <textarea id="description" name="description" class="form-control" placeholder="请输入群组描述（可选）"></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn">
+                        <i class="fas fa-plus-circle"></i> 创建群组
+                    </button>
+                    <a href="{% url 'FoodApp:groups' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> 返回群组列表
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

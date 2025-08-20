@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健康挑战 - 膳衡方程式</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-dark: #3a56d4;
+            --primary-light: #edf2ff;
+            --secondary-color: #3f37c9;
+            --accent-color: #4cc9f0;
+            --dark-color: #35424a;
+            --light-color: #f4f4f4;
+            --success-color: #4caf50;
+            --danger-color: #f44336;
+            --warning-color: #ff9800;
+            --info-color: #2196f3;
+            --border-color: #ddd;
+            --text-color: #333;
+            --text-light: #777;
+            --shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --pulse-animation: pulse 2s infinite;
+            --bounce-animation: bounce 2s infinite;
+            --float-animation: float 3s ease-in-out infinite;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content {
+            flex: 1;
+            max-width: 1200px;
+            width: 90%;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .page-title {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .page-title h1 {
+            font-size: 2rem;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-title p {
+            color: #666;
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .message i {
+            margin-right: 0.5rem;
+        }
+
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message.warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .message.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .challenges-header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .challenges-header h2 {
+            font-size: 1.8rem;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .challenges-header h2 i {
+            margin-right: 0.5rem;
+        }
+
+        .challenges-header p {
+            color: #666;
+        }
+
+        .challenges-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .challenge-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .challenge-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .challenge-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        .challenge-title {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+        }
+
+        .challenge-duration {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .challenge-duration i {
+            margin-right: 0.5rem;
+        }
+
+        .challenge-body {
+            padding: 1.5rem;
+        }
+
+        .challenge-description {
+            color: #666;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .challenge-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .meta-item {
+            text-align: center;
+        }
+
+        .meta-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .meta-label {
+            font-size: 0.9rem;
+            color: #777;
+        }
+
+        .challenge-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 30px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            border: none;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .no-challenges {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+            grid-column: 1 / -1;
+        }
+
+        .no-challenges i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #ccc;
+        }
+
+        .no-challenges h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--dark-color);
+            margin: 3rem 0 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title i {
+            margin-right: 0.5rem;
+        }
+
+        .create-challenge-section {
+            background: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        footer {
+            background: linear-gradient(135deg, var(--dark-color), #343a40);
+            color: white;
+            padding: 2rem 5%;
+            margin-top: 2rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 1rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        .footer-section h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 30px;
+            height: 2px;
+            background: var(--accent-color);
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-links a {
+            color: #adb5bd;
+            text-decoration: none;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+        }
+
+        .footer-links a:hover {
+            color: white;
+            transform: translateX(3px);
+        }
+
+        .footer-links a i {
+            margin-right: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #adb5bd;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .challenges-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .challenge-meta {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+            100% {
+                transform: translateY(0px);
+            }
+        }
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 0;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .navbar-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 700;
+            animation: var(--pulse-animation);
+        }
+
+        .logo-icon {
+            margin-right: 10px;
+            color: var(--accent-color);
+            animation: rotate 3s linear infinite;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-left: 1.5rem;
+            position: relative;
+            animation: fadeIn 0.5s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .nav-item:nth-child(1) { animation-delay: 0.1s; }
+        .nav-item:nth-child(2) { animation-delay: 0.2s; }
+        .nav-item:nth-child(3) { animation-delay: 0.3s; }
+        .nav-item:nth-child(4) { animation-delay: 0.4s; }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .nav-link:hover::before {
+            left: 100%;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-link i {
+            margin-right: 0.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link:hover i {
+            transform: scale(1.2);
+        }
+
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background: white;
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            z-index: 1;
+            top: 100%;
+            left: 0;
+            padding: 0.5rem 0;
+            margin-top: 0.5rem;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-content a {
+            color: var(--dark-color);
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dropdown-content a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(67, 97, 238, 0.1), transparent);
+            transition: 0.5s;
+        }
+
+        .dropdown-content a:hover::before {
+            left: 100%;
+        }
+
+        .dropdown-content a i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .dropdown-content a:hover {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            transform: translateX(5px);
+        }
+
+        .dropdown-content a:hover i {
+            transform: translateX(3px);
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 1rem;
+            object-fit: cover;
+            border: 2px solid white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: var(--float-animation);
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+
+        .btn {
+            display: inline-block;
+            background: white;
+            color: var(--primary-color);
+            padding: 10px 20px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-outline:hover {
+            background: white;
+            color: var(--primary-color);
+        }
+
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .mobile-toggle:hover {
+            transform: rotate(90deg);
+        }
+
+        .page-title {
+            text-align: center;
+            margin: 2rem 0;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .page-title h1 {
+            font-size: 2.5rem;
+            color: var(--dark-color);
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .page-title h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            border-radius: 2px;
+        }
+
+        .page-title p {
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        /* 页脚 */
+        .footer {
+            background: var(--dark-color);
+            color: white;
+            padding: 3rem 0 1.5rem;
+            margin-top: 3rem;
+            position: relative;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color), var(--accent-color));
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--accent-color);
+            position: relative;
+            display: inline-block;
+        }
+
+        .footer-section h3::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background: var(--primary-color);
+            border-radius: 1.5px;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.5rem;
+            position: relative;
+            padding-left: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .footer-links li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--accent-color);
+            transition: all 0.3s ease;
+        }
+
+        .footer-links li:hover {
+            padding-left: 20px;
+            transform: translateX(5px);
+        }
+
+        .footer-links li:hover::before {
+            color: var(--primary-color);
+        }
+
+        .footer-links a {
+            color: #ccc;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: white;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .social-links a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: 0.5s;
+        }
+
+        .social-links a:hover::before {
+            left: 100%;
+        }
+
+        .social-links a:hover {
+            background: var(--accent-color);
+            transform: translateY(-3px) rotate(10deg);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+        /* 新导航栏样式 */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 0;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .navbar-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 700;
+            animation: var(--pulse-animation);
+        }
+
+        .logo-icon {
+            margin-right: 10px;
+            color: var(--accent-color);
+            animation: rotate 3s linear infinite;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-left: 1.5rem;
+            position: relative;
+            animation: fadeIn 0.5s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .nav-item:nth-child(1) { animation-delay: 0.1s; }
+        .nav-item:nth-child(2) { animation-delay: 0.2s; }
+        .nav-item:nth-child(3) { animation-delay: 0.3s; }
+        .nav-item:nth-child(4) { animation-delay: 0.4s; }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .nav-link:hover::before {
+            left: 100%;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-link i {
+            margin-right: 0.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link:hover i {
+            transform: scale(1.2);
+        }
+
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background: white;
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            z-index: 1;
+            top: 100%;
+            left: 0;
+            padding: 0.5rem 0;
+            margin-top: 0.5rem;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-content a {
+            color: var(--dark-color);
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dropdown-content a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(67, 97, 238, 0.1), transparent);
+            transition: 0.5s;
+        }
+
+        .dropdown-content a:hover::before {
+            left: 100%;
+        }
+
+        .dropdown-content a i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .dropdown-content a:hover {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            transform: translateX(5px);
+        }
+
+        .dropdown-content a:hover i {
+            transform: translateX(3px);
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 1rem;
+            object-fit: cover;
+            border: 2px solid white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: var(--float-animation);
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+
+        .btn {
+            display: inline-block;
+            background: white;
+            color: var(--primary-color);
+            padding: 10px 20px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-outline:hover {
+            background: white;
+            color: var(--primary-color);
+        }
+
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .mobile-toggle:hover {
+            transform: rotate(90deg);
+        }
+
+        .page-title {
+            text-align: center;
+            margin: 2rem 0;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .page-title h1 {
+            font-size: 2.5rem;
+            color: var(--dark-color);
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .page-title h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            border-radius: 2px;
+        }
+
+        .page-title p {
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <div class="navbar-container">
+                <a href="{% url 'FoodApp:index' %}" class="logo">
+                    <i class="fas fa-utensils logo-icon"></i>
+                    膳衡方程式
+                </a>
+
+                <ul class="nav-menu" id="navMenu">
+                    <li class="nav-item">
+                        <a href="{% url 'FoodApp:index' %}" class="nav-link"><i class="fas fa-home"></i> 首页</a>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link"><i class="fas fa-utensils"></i> 饮食追踪 <i class="fas fa-chevron-down" style="font-size: 0.8rem; margin-left: 0.5rem;"></i></a>
+                        <div class="dropdown-content">
+                            <a href="{% url 'FoodApp:food_search' %}"><i class="fas fa-search"></i> 食物查询</a>
+                            <a href="{% url 'FoodApp:food_image_recognition' %}"><i class="fas fa-camera"></i> 图片识别</a>
+                            <a href="{% url 'FoodApp:add_meal' %}"><i class="fas fa-plus-circle"></i> 添加餐食</a>
+                            <a href="{% url 'FoodApp:nutrition_analysis' %}"><i class="fas fa-chart-pie"></i> 营养分析</a>
+                            <a href="{% url 'FoodApp:recipe_suggestion' %}"><i class="fas fa-book"></i> 食谱推荐</a>
+                            <a href="{% url 'FoodApp:meal_suggestion' %}"><i class="fas fa-lightbulb"></i> 膳食建议</a>
+                            <a href="{% url 'FoodApp:add_food' %}"><i class="fas fa-utensils"></i> 添加食物</a>
+                        </div>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link"><i class="fas fa-users"></i> 社区互动 <i class="fas fa-chevron-down" style="font-size: 0.8rem; margin-left: 0.5rem;"></i></a>
+                        <div class="dropdown-content">
+                            <a href="{% url 'FoodApp:groups' %}"><i class="fas fa-users"></i> 群组</a>
+                            <a href="{% url 'FoodApp:health_challenges' %}"><i class="fas fa-trophy"></i> 健康挑战</a>
+                            <a href="{% url 'FoodApp:activity_diary' %}"><i class="fas fa-calendar-alt"></i> 活动日记</a>
+                        </div>
+                    </li>
+
+                    {% if user_id %}
+                    <li class="nav-item nav-user">
+                        {% if avatar %}
+                            {{ avatar|safe }}
+                        {% else %}
+                            <div class="user-avatar" style="display: flex; align-items: center; justify-content: center; background: var(--accent-color);">
+                                <i class="fas fa-user" style="color: white;"></i>
+                            </div>
+                        {% endif %}
+                        <a href="{% url 'FoodApp:logout' %}" class="btn btn-outline">退出</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a href="{% url 'FoodApp:login' %}" class="btn">登录</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{% url 'FoodApp:register' %}" class="btn" style="margin-right: 10px;">注册</a>
+                    </li>
+                    {% endif %}
+                </ul>
+
+                <button class="mobile-toggle" id="mobileToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="page-title">
+            <h1><i class="fas fa-fire"></i> 健康挑战</h1>
+            <p>参与挑战，与朋友们一起养成健康的生活习惯</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                {% if message.tags %}
+                <div class="message {{ message.tags }}">
+                    <i class="fas fa-info-circle"></i> {{ message }}
+                </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+
+        <div class="challenges-header">
+            <h2><i class="fas fa-fire"></i> 热门挑战</h2>
+            <p>以下是当前正在进行的挑战，按参与人数排序</p>
+        </div>
+
+        <div class="challenges-grid">
+            {% if challenges %}
+                {% for challenge in challenges %}
+                <div class="challenge-card">
+                    <div class="challenge-header">
+                        <h3 class="challenge-title">{{ challenge.title }}</h3>
+                        <div class="challenge-duration">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>{{ challenge.start_date }} 至 {{ challenge.end_date }}</span>
+                        </div>
+                    </div>
+                    <div class="challenge-body">
+                        <p class="challenge-description">
+                            {{ challenge.description }}
+                        </p>
+                        
+                        <div class="challenge-meta">
+                            <div class="meta-item">
+                                <div class="meta-value">{{ challenge.participant_count }}</div>
+                                <div class="meta-label">参与者</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-value">{{ challenge.target_value }}{{ challenge.unit }}</div>
+                                <div class="meta-label">目标</div>
+                            </div>
+                        </div>
+                        
+                        <div class="challenge-actions">
+                            {% if challenge and challenge.id %}
+                            <form method="POST" action="{% url 'FoodApp:join_challenge' challenge.id %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary">参与挑战</button>
+                            </form>
+                            {% endif %}
+                            <a href="{% url 'FoodApp:challenge_detail' challenge.id %}" class="btn btn-secondary">查看详情</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-challenges">
+                    <i class="fas fa-trophy"></i>
+                    <h3>暂无挑战</h3>
+                    <p>当前没有正在进行的挑战</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- 已结束挑战 -->
+        {% if ended_challenges %}
+        <h2 class="section-title"><i class="fas fa-history"></i> 已结束的挑战</h2>
+        
+        <div class="challenges-grid">
+            {% for challenge in ended_challenges %}
+            <div class="challenge-card">
+                <div class="challenge-header">
+                    <h3 class="challenge-title">{{ challenge.title }}</h3>
+                    <div class="challenge-duration">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>{{ challenge.start_date }} 至 {{ challenge.end_date }}</span>
+                    </div>
+                </div>
+                <div class="challenge-body">
+                    <p class="challenge-description">
+                        {{ challenge.description }}
+                    </p>
+                    
+                    <div class="challenge-meta">
+                        <div class="meta-item">
+                            <div class="meta-value">{{ challenge.participant_count }}</div>
+                            <div class="meta-label">参与者</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-value">{{ challenge.target_value }}{{ challenge.unit }}</div>
+                            <div class="meta-label">目标</div>
+                        </div>
+                    </div>
+                    
+                    <div class="challenge-actions">
+                        <a href="{% url 'FoodApp:challenge_detail' challenge.id %}" class="btn btn-secondary">查看详情</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <section class="create-challenge-section">
+            <h3 class="section-title"><i class="fas fa-plus-circle"></i> 创建新挑战</h3>
+            <p style="margin-bottom: 1.5rem; color: #666;">发起一个属于你的健康挑战，邀请朋友们一起参与</p>
+            
+            <form method="POST" action="{% url 'FoodApp:create_health_challenge' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label class="form-label" for="challengeName">挑战名称</label>
+                    <input type="text" id="challengeName" name="title" class="form-input" placeholder="例如：7天蔬食挑战" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="challengeDuration">挑战时长（天）</label>
+                    <input type="number" id="challengeDuration" name="duration" class="form-input" min="1" max="365" value="7" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="challengeGoal">目标值</label>
+                    <input type="number" id="challengeGoal" name="target_value" class="form-input" min="1" step="0.1" placeholder="例如：2000" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="challengeUnit">单位</label>
+                    <input type="text" id="challengeUnit" name="unit" class="form-input" placeholder="例如：千卡、分钟、杯" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="challengeDescription">挑战描述</label>
+                    <textarea id="challengeDescription" name="description" class="form-input" rows="4" placeholder="描述你的挑战内容和规则" required></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">创建挑战</button>
+            </form>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h3>膳衡方程式</h3>
+                    <p>您的个人健康饮食管理助手，致力于帮助每个人实现健康的生活方式。</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h3>核心功能</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'FoodApp:index' %}">首页</a></li>
+                        <li><a href="{% url 'FoodApp:food_search' %}">食物查询</a></li>
+                        <li><a href="{% url 'FoodApp:food_image_recognition' %}">图片识别</a></li>
+                        <li><a href="{% url 'FoodApp:add_meal' %}">添加餐食</a></li>
+                        <li><a href="{% url 'FoodApp:nutrition_analysis' %}">营养分析</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3>智能推荐</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'FoodApp:recipe_suggestion' %}">食谱推荐</a></li>
+                        <li><a href="{% url 'FoodApp:meal_suggestion' %}">膳食建议</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3>社区互动</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'FoodApp:groups' %}">群组</a></li>
+                        <li><a href="{% url 'FoodApp:health_challenges' %}">健康挑战</a></li>
+                        <li><a href="{% url 'FoodApp:activity_diary' %}">活动日记</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="copyright">
+                <p>&copy; 2025 膳衡方程式. 保留所有权利。</p>
+            </div>
+        </div>
+    </footer>
+<script>
+    // 添加延迟显示子菜单的逻辑
+        document.querySelectorAll('.dropdown').forEach(dropdown => {
+            let timeoutId;
+
+            dropdown.addEventListener('mouseenter', () => {
+                clearTimeout(timeoutId);
+                const dropdownContent = dropdown.querySelector('.dropdown-content');
+                if (dropdownContent) {
+                    dropdownContent.style.display = 'block';
+                    setTimeout(() => {
+                        dropdownContent.style.opacity = '1';
+                        dropdownContent.style.transform = 'translateY(0)';
+                    }, 50);
+                }
+            });
+
+            dropdown.addEventListener('mouseleave', () => {
+                timeoutId = setTimeout(() => {
+                    const dropdownContent = dropdown.querySelector('.dropdown-content');
+                    if (dropdownContent) {
+                        dropdownContent.style.opacity = '0';
+                        dropdownContent.style.transform = 'translateY(-10px)';
+                        setTimeout(() => {
+                            dropdownContent.style.display = 'none';
+                        }, 300);
+                    }
+                }, 300);
+            });
+        });
+    // 点击头像跳转到个人主页
+        document.querySelectorAll('.user-avatar').forEach(avatar => {
+            avatar.addEventListener('click', () => {
+                window.location.href = "{% url 'FoodApp:profile' %}";
+            });
+        });
+</script>
+</body>
+</html>

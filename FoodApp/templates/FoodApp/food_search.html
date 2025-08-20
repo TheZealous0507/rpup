@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>食物查询 - 膳衡方程式</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    {% load static %}
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-dark: #3a56d4;
+            --primary-light: #edf2ff;
+            --secondary-color: #3f37c9;
+            --accent-color: #4cc9f0;
+            --dark-color: #35424a;
+            --light-color: #f4f4f4;
+            --success-color: #4caf50;
+            --danger-color: #f44336;
+            --warning-color: #ff9800;
+            --info-color: #2196f3;
+            --border-color: #ddd;
+            --text-color: #333;
+            --text-light: #777;
+            --shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --pulse-animation: pulse 2s infinite;
+            --bounce-animation: bounce 2s infinite;
+            --float-animation: float 3s ease-in-out infinite;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 添加背景装饰元素 */
+        body::before {
+            content: "";
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            opacity: 0.1;
+            animation: float 8s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        body::after {
+            content: "";
+            position: absolute;
+            bottom: -100px;
+            left: -50px;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+            opacity: 0.1;
+            animation: float 10s ease-in-out infinite reverse;
+            z-index: -1;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* 动画定义 */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 导航栏样式 */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 0;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .navbar-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 700;
+            animation: var(--pulse-animation);
+        }
+
+        .logo-icon {
+            margin-right: 10px;
+            color: var(--accent-color);
+            animation: rotate 3s linear infinite;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-left: 1.5rem;
+            position: relative;
+            animation: fadeIn 0.5s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .nav-link:hover::before {
+            left: 100%;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-link i {
+            margin-right: 0.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link:hover i {
+            transform: scale(1.2);
+        }
+
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background: white;
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            z-index: 1;
+            top: 100%;
+            left: 0;
+            padding: 0.5rem 0;
+            margin-top: 0.5rem;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-content a {
+            color: var(--dark-color);
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dropdown-content a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(67, 97, 238, 0.1), transparent);
+            transition: 0.5s;
+        }
+
+        .dropdown-content a:hover::before {
+            left: 100%;
+        }
+
+        .dropdown-content a i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .dropdown-content a:hover {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            transform: translateX(5px);
+        }
+
+        .dropdown-content a:hover i {
+            transform: translateX(3px);
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 1rem;
+            object-fit: cover;
+            border: 2px solid white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: var(--float-animation);
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+
+        .btn {
+            display: inline-block;
+            background: white;
+            color: var(--primary-color);
+            padding: 10px 20px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-outline:hover {
+            background: white;
+            color: var(--primary-color);
+        }
+
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .mobile-toggle:hover {
+            transform: rotate(90deg);
+        }
+
+        /* 页面标题 */
+        .page-title {
+            text-align: center;
+            margin: 2rem 0;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .page-title h1 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-title p {
+            font-size: 1.1rem;
+            color: #666;
+        }
+
+        /* 介绍区域 */
+        .intro-section {
+            margin: 2rem 0;
+        }
+
+        .intro-card {
+            background: linear-gradient(135deg, var(--primary-light), white);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .intro-card h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .intro-card p {
+            color: #555;
+            line-height: 1.8;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: var(--transition);
+            border-top: 3px solid var(--accent-color);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-card p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        /* 搜索容器 */
+        .search-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+        }
+
+        .search-form {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* 食物网格 */
+        .foods-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .food-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            transition: var(--transition);
+            border-left: 4px solid var(--primary-color);
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .food-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .food-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transform: translateX(-100%);
+        }
+
+        .food-card:hover::before {
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .food-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .food-calories {
+            color: var(--accent-color);
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .food-details {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .detail-label {
+            color: #666;
+        }
+
+        .detail-value {
+            font-weight: 500;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+            font-style: italic;
+        }
+
+        .api-result-card {
+            background: linear-gradient(135deg, var(--primary-light), #e0e7ff);
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-top: 2rem;
+            border-left: 4px solid var(--accent-color);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .api-result-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .api-result-title i {
+            color: var(--accent-color);
+        }
+
+        /* 小贴士区域 */
+        .tips-section {
+            margin: 3rem 0;
+        }
+
+        .tips-section h2 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .tip-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .tip-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .tip-card h3 {
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .tip-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* 页脚 */
+        .footer {
+            background: linear-gradient(135deg, #35424a 0%, #2c3e50 100%);
+            color: white;
+            padding: 3rem 0 1.5rem;
+            margin-top: auto;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--accent-color);
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        .footer-section h3::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: var(--accent-color);
+            border-radius: 3px;
+        }
+
+        .footer-section p {
+            line-height: 1.8;
+            color: #ddd;
+            margin-bottom: 1rem;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: white;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .social-links a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: 0.5s;
+        }
+
+        .social-links a:hover::before {
+            left: 100%;
+        }
+
+        .social-links a:hover {
+            background: var(--accent-color);
+            transform: translateY(-3px) rotate(10deg);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.8rem;
+            position: relative;
+            padding-left: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .footer-links li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--accent-color);
+            transition: all 0.3s ease;
+        }
+
+        .footer-links li:hover {
+            padding-left: 20px;
+            transform: translateX(5px);
+        }
+
+        .footer-links li:hover::before {
+            color: var(--primary-color);
+        }
+
+        .footer-links a {
+            color: #ccc;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        /* 添加食物按钮 */
+        .add-food-btn {
+            background: linear-gradient(135deg, var(--success-color), #43a047);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .add-food-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+            background: linear-gradient(135deg, #43a047, var(--success-color));
+        }
+
+        .add-food-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .add-food-btn i {
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 768px) {
+            .navbar-container {
+                padding: 1rem;
+            }
+            
+            .nav-menu {
+                position: fixed;
+                left: -100%;
+                top: 70px;
+                flex-direction: column;
+                background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+                width: 100%;
+                text-align: center;
+                transition: 0.3s;
+                box-shadow: var(--shadow);
+                padding: 2rem;
+            }
+
+            .nav-menu.active {
+                left: 0;
+            }
+
+            .nav-item {
+                margin: 10px 0;
+            }
+
+            .mobile-toggle {
+                display: block;
+            }
+
+            .dropdown-content {
+                position: static;
+                display: none;
+                box-shadow: none;
+                background: rgba(255, 255, 255, 0.1);
+                margin-top: 10px;
+            }
+
+            .dropdown.active .dropdown-content {
+                display: block;
+            }
+
+            .dropdown-content a {
+                color: white;
+                padding: 0.5rem 1rem;
+            }
+
+            .page-title h1 {
+                font-size: 2rem;
+            }
+
+            .search-form {
+                flex-direction: column;
+            }
+
+            .foods-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <div class="navbar-container">
+                <a href="{% url 'FoodApp:index' %}" class="logo">
+                    <i class="fas fa-utensils logo-icon"></i>
+                    膳衡方程式
+                </a>
+
+                <ul class="nav-menu" id="navMenu">
+                    <li class="nav-item">
+                        <a href="{% url 'FoodApp:index' %}" class="nav-link"><i class="fas fa-home"></i> 首页</a>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link"><i class="fas fa-utensils"></i> 饮食追踪 <i class="fas fa-chevron-down" style="font-size: 0.8rem; margin-left: 0.5rem;"></i></a>
+                        <div class="dropdown-content">
+                            <a href="{% url 'FoodApp:food_search' %}"><i class="fas fa-search"></i> 食物查询</a>
+                            <a href="{% url 'FoodApp:food_image_recognition' %}"><i class="fas fa-camera"></i> 图片识别</a>
+                            <a href="{% url 'FoodApp:add_meal' %}"><i class="fas fa-plus-circle"></i> 添加餐食</a>
+                            <a href="{% url 'FoodApp:nutrition_analysis' %}"><i class="fas fa-chart-pie"></i> 营养分析</a>
+                            <a href="{% url 'FoodApp:recipe_suggestion' %}"><i class="fas fa-book"></i> 食谱推荐</a>
+                            <a href="{% url 'FoodApp:meal_suggestion' %}"><i class="fas fa-lightbulb"></i> 膳食建议</a>
+                            <a href="{% url 'FoodApp:add_food' %}"><i class="fas fa-utensils"></i> 添加食物</a>
+                        </div>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link"><i class="fas fa-users"></i> 社区互动 <i class="fas fa-chevron-down" style="font-size: 0.8rem; margin-left: 0.5rem;"></i></a>
+                        <div class="dropdown-content">
+                            <a href="{% url 'FoodApp:groups' %}"><i class="fas fa-users"></i> 群组</a>
+                            <a href="{% url 'FoodApp:health_challenges' %}"><i class="fas fa-trophy"></i> 健康挑战</a>
+                            <a href="{% url 'FoodApp:activity_diary' %}"><i class="fas fa-calendar-alt"></i> 活动日记</a>
+                        </div>
+                    </li>
+
+                    {% if user_id %}
+                    <li class="nav-item nav-user">
+                        {% if avatar %}
+                            {{ avatar|safe }}
+                        {% else %}
+                            <div class="user-avatar" style="display: flex; align-items: center; justify-content: center; background: var(--accent-color);">
+                                <i class="fas fa-user" style="color: white;"></i>
+                            </div>
+                        {% endif %}
+                        <a href="{% url 'FoodApp:logout' %}" class="btn btn-outline">退出</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a href="{% url 'FoodApp:login' %}" class="btn">登录</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{% url 'FoodApp:register' %}" class="btn" style="margin-right: 10px;">注册</a>
+                    </li>
+                    {% endif %}
+                </ul>
+
+                <button class="mobile-toggle" id="mobileToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-content">
+        <div class="container">
+            <div class="page-title">
+                <h1>食物查询</h1>
+                <p>搜索食物获取详细的营养信息</p>
+            </div>
+            
+            <div class="intro-section">
+                <div class="intro-card">
+                    <h2><i class="fas fa-info-circle"></i> 关于食物查询</h2>
+                    <p>通过我们的食物查询功能，您可以快速获取各种食物的详细营养信息，包括热量、蛋白质、碳水化合物和脂肪含量。这有助于您更好地管理饮食，实现健康目标。</p>
+                </div>
+                
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <h3>本地数据库</h3>
+                        <p>我们拥有丰富的食物营养数据库，提供准确的营养信息</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <h3>AI智能补充</h3>
+                        <p>数据库中没有的食物可通过AI智能获取营养信息</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h3>快速搜索</h3>
+                        <p>简单输入食物名称即可快速查询相关营养信息</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="search-container">
+                <div class="search-form">
+                    <input type="text" id="food-search-input" class="search-input" placeholder="输入食物名称..." value="{{ query }}">
+                    <button type="button" id="search-button" class="btn"><i class="fas fa-search"></i> 搜索</button>
+                </div>
+                
+                <div class="loading" id="loading" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>正在搜索食物信息，请稍候...</p>
+                </div>
+                
+                <div id="search-results">
+                    {% if foods %}
+                    <div class="foods-grid">
+                        {% for food in foods %}
+                        <div class="food-card">
+                            <div class="food-name">{{ food.name }}</div>
+                            <div class="food-calories">{{ food.calories_per_100g|floatformat:0 }} 千卡/100克</div>
+                            <div class="food-details">
+                                <div class="detail-item">
+                                    <span class="detail-label">蛋白质:</span>
+                                    <span class="detail-value">{{ food.protein_per_100g|floatformat:1 }}克</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">碳水化合物:</span>
+                                    <span class="detail-value">{{ food.carbs_per_100g|floatformat:1 }}克</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">脂肪:</span>
+                                    <span class="detail-value">{{ food.fat_per_100g|floatformat:1 }}克</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% elif query %}
+                    <div class="no-results">
+                        <p>未在本地数据库中找到与 "{{ query }}" 相关的食物</p>
+                    </div>
+                    
+                    {% if api_result %}
+                    <div class="api-result-card">
+                        <div class="api-result-title">
+                            <i class="fas fa-robot"></i>
+                            <span>AI助手提供的营养信息</span>
+                        </div>
+                        <div class="food-card">
+                            <div class="food-name">{{ api_result.name }}</div>
+                            <div class="food-calories">{{ api_result.calories|floatformat:0 }} 千卡/100克</div>
+                            <div class="food-details">
+                                <div class="detail-item">
+                                    <span class="detail-label">蛋白质:</span>
+                                    <span class="detail-value">{{ api_result.protein|floatformat:1 }}克</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">碳水化合物:</span>
+                                    <span class="detail-value">{{ api_result.carbs|floatformat:1 }}克</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">脂肪:</span>
+                                    <span class="detail-value">{{ api_result.fat|floatformat:1 }}克</span>
+                                </div>
+                            </div>
+                            <form method="post" style="margin-top: 15px;">
+                                {% csrf_token %}
+                                <input type="hidden" name="food_name" value="{{ api_result.name }}">
+                                <input type="hidden" name="calories_per_100g" value="{{ api_result.calories }}">
+                                <input type="hidden" name="protein_per_100g" value="{{ api_result.protein }}">
+                                <input type="hidden" name="carbs_per_100g" value="{{ api_result.carbs }}">
+                                <input type="hidden" name="fat_per_100g" value="{{ api_result.fat }}">
+                                <button type="submit" name="add_to_database" class="btn add-food-btn">
+                                    <i class="fas fa-plus-circle"></i> 添加到数据库
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="tips-section">
+                <h2><i class="fas fa-lightbulb"></i> 营养小贴士</h2>
+                <div class="tips-grid">
+                    <div class="tip-card">
+                        <h3>均衡饮食</h3>
+                        <p>确保每天摄入适量的蛋白质、碳水化合物和健康脂肪，保持营养均衡。</p>
+                    </div>
+                    <div class="tip-card">
+                        <h3>控制热量</h3>
+                        <p>了解食物热量有助于控制每日总热量摄入，实现健康目标。</p>
+                    </div>
+                    <div class="tip-card">
+                        <h3>多样化选择</h3>
+                        <p>多样化食物选择可以确保获得各种必需营养素。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h3>膳衡方程式</h3>
+                    <p>您的个人健康饮食管理助手，致力于帮助每个人实现健康的生活方式。</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>快速链接</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'FoodApp:index' %}"><i class="fas fa-chevron-right"></i> 首页</a></li>
+                        <li><a href="{% url 'FoodApp:food_search' %}"><i class="fas fa-chevron-right"></i> 食物查询</a></li>
+                        <li><a href="{% url 'FoodApp:food_image_recognition' %}"><i class="fas fa-chevron-right"></i> 图片识别</a></li>
+                        <li><a href="{% url 'FoodApp:add_meal' %}"><i class="fas fa-chevron-right"></i> 添加餐食</a></li>
+                        <li><a href="{% url 'FoodApp:nutrition_analysis' %}"><i class="fas fa-chevron-right"></i> 营养分析</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>社区功能</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'FoodApp:groups' %}"><i class="fas fa-chevron-right"></i> 群组</a></li>
+                        <li><a href="{% url 'FoodApp:health_challenges' %}"><i class="fas fa-chevron-right"></i> 健康挑战</a></li>
+                        <li><a href="{% url 'FoodApp:activity_diary' %}"><i class="fas fa-chevron-right"></i> 活动日记</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> 成功案例</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>支持</h3>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> 帮助中心</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> 联系我们</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> 隐私政策</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> 使用条款</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2025 膳衡方程式. 保留所有权利。</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 移动端菜单切换
+        const mobileToggle = document.getElementById('mobileToggle');
+        const navMenu = document.getElementById('navMenu');
+        
+        mobileToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+        
+        // 点击菜单项后关闭移动端菜单
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+            });
+        });
+        
+        // 点击头像跳转到个人主页
+        document.querySelectorAll('.user-avatar').forEach(avatar => {
+            avatar.addEventListener('click', () => {
+                window.location.href = "{% url 'FoodApp:profile' %}";
+            });
+        });
+        
+        // 添加延迟显示子菜单的逻辑
+        document.querySelectorAll('.dropdown').forEach(dropdown => {
+            let timeoutId;
+            
+            dropdown.addEventListener('mouseenter', () => {
+                clearTimeout(timeoutId);
+                const dropdownContent = dropdown.querySelector('.dropdown-content');
+                if (dropdownContent) {
+                    dropdownContent.style.display = 'block';
+                    setTimeout(() => {
+                        dropdownContent.style.opacity = '1';
+                        dropdownContent.style.transform = 'translateY(0)';
+                    }, 50);
+                }
+            });
+            
+            dropdown.addEventListener('mouseleave', () => {
+                timeoutId = setTimeout(() => {
+                    const dropdownContent = dropdown.querySelector('.dropdown-content');
+                    if (dropdownContent) {
+                        dropdownContent.style.opacity = '0';
+                        dropdownContent.style.transform = 'translateY(-10px)';
+                        setTimeout(() => {
+                            dropdownContent.style.display = 'none';
+                        }, 300);
+                    }
+                }, 500); // 500ms延迟隐藏子菜单
+            });
+            
+            // 为子菜单添加事件监听器
+            const dropdownContent = dropdown.querySelector('.dropdown-content');
+            if (dropdownContent) {
+                dropdownContent.addEventListener('mouseenter', () => {
+                    clearTimeout(timeoutId);
+                });
+                
+                dropdownContent.addEventListener('mouseleave', () => {
+                    timeoutId = setTimeout(() => {
+                        dropdownContent.style.opacity = '0';
+                        dropdownContent.style.transform = 'translateY(-10px)';
+                        setTimeout(() => {
+                            dropdownContent.style.display = 'none';
+                        }, 300);
+                    }, 500); // 500ms延迟隐藏子菜单
+                });
+            }
+        });
+        
+        // 移动端下拉菜单切换
+        document.querySelectorAll('.nav-item.dropdown').forEach(dropdown => {
+            dropdown.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768) {
+                    e.stopPropagation();
+                    dropdown.classList.toggle('active');
+                }
+            });
+        });
+        
+        // 点击页面其他地方关闭下拉菜单
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768) {
+                document.querySelectorAll('.nav-item.dropdown').forEach(dropdown => {
+                    if (!dropdown.contains(e.target)) {
+                        dropdown.classList.remove('active');
+                    }
+                });
+            }
+        });
+        
+        // Ajax搜索功能
+        document.getElementById('search-button').addEventListener('click', function() {
+            performSearch();
+        });
+        
+        document.getElementById('food-search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+        
+        function performSearch() {
+            const query = document.getElementById('food-search-input').value.trim();
+            if (query.length === 0) {
+                return;
+            }
+            
+            // 显示加载状态
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('search-results').innerHTML = '';
+            
+            // 发送Ajax请求
+            fetch('/food/search/ajax/?q=' + encodeURIComponent(query))
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('loading').style.display = 'none';
+                    
+                    if (data.foods && data.foods.length > 0) {
+                        // 显示数据库搜索结果
+                        displayDatabaseResults(data.foods);
+                    } else {
+                        // 如果数据库没有结果，调用API搜索
+                        searchFromAPI(query);
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('loading').style.display = 'none';
+                    console.error('搜索出错:', error);
+                    document.getElementById('search-results').innerHTML = '<div class="no-results"><p>搜索过程中出现错误，请稍后重试</p></div>';
+                });
+        }
+        
+        function searchFromAPI(query) {
+            // 显示加载状态
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('search-results').innerHTML = '';
+            
+            // 发送API搜索请求
+            fetch('/food/search/api/?q=' + encodeURIComponent(query))
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('loading').style.display = 'none';
+                    console.log(data);
+                    if (data.foods) {
+                        // 显示API搜索结果
+                        displayAPIResults(data.foods);
+                    } else {
+                        // 显示未找到结果
+                        document.getElementById('search-results').innerHTML = `
+                            <div class="no-results">
+                                <p>未找到与 "${query}" 相关的食物</p>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('loading').style.display = 'none';
+                    console.error('API搜索出错:', error);
+                    document.getElementById('search-results').innerHTML = '<div class="no-results"><p>搜索过程中出现错误，请稍后重试</p></div>';
+                });
+        }
+        
+        function displayDatabaseResults(foods) {
+            let html = '<div class="foods-grid">';
+            
+            foods.forEach(food => {
+                html += `
+                    <div class="food-card">
+                        <div class="food-name">${food.name}</div>
+                        <div class="food-calories">${parseFloat(food.calories).toFixed(0)} 千卡/100克</div>
+                        <div class="food-details">
+                            <div class="detail-item">
+                                <span class="detail-label">蛋白质:</span>
+                                <span class="detail-value">${parseFloat(food.protein).toFixed(1)}克</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">碳水化合物:</span>
+                                <span class="detail-value">${parseFloat(food.carbs).toFixed(1)}克</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">脂肪:</span>
+                                <span class="detail-value">${parseFloat(food.fat).toFixed(1)}克</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            document.getElementById('search-results').innerHTML = html;
+        }
+        
+        function displayAPIResults(food) {
+            const html = `
+                <div class="api-result-card">
+                    <div class="api-result-title">
+                        <i class="fas fa-robot"></i>
+                        <span>AI助手提供的营养信息</span>
+                    </div>
+                    <div class="food-card">
+                        <div class="food-name">${food.name}</div>
+                        <div class="food-calories">${parseFloat(food.calories).toFixed(0)} 千卡/100克</div>
+                        <div class="food-details">
+                            <div class="detail-item">
+                                <span class="detail-label">蛋白质:</span>
+                                <span class="detail-value">${parseFloat(food.protein).toFixed(1)}克</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">碳水化合物:</span>
+                                <span class="detail-value">${parseFloat(food.carbs).toFixed(1)}克</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">脂肪:</span>
+                                <span class="detail-value">${parseFloat(food.fat).toFixed(1)}克</span>
+                            </div>
+                        </div>
+                        <form method="post" style="margin-top: 15px;">
+                            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                            <input type="hidden" name="food_name" value="${food.name}">
+                            <input type="hidden" name="calories_per_100g" value="${food.calories}">
+                            <input type="hidden" name="protein_per_100g" value="${food.protein}">
+                            <input type="hidden" name="carbs_per_100g" value="${food.carbs}">
+                            <input type="hidden" name="fat_per_100g" value="${food.fat}">
+                            <button type="submit" name="add_to_database" class="btn add-food-btn">
+                                <i class="fas fa-plus-circle"></i> 添加到数据库
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('search-results').innerHTML = html;
+        }
+        // 添加延迟显示子菜单的逻辑
+        document.querySelectorAll('.dropdown').forEach(dropdown => {
+            let timeoutId;
+
+            dropdown.addEventListener('mouseenter', () => {
+                clearTimeout(timeoutId);
+                const dropdownContent = dropdown.querySelector('.dropdown-content');
+                if (dropdownContent) {
+                    dropdownContent.style.display = 'block';
+                    setTimeout(() => {
+                        dropdownContent.style.opacity = '1';
+                        dropdownContent.style.transform = 'translateY(0)';
+                    }, 50);
+                }
+            });
+
+            dropdown.addEventListener('mouseleave', () => {
+                timeoutId = setTimeout(() => {
+                    const dropdownContent = dropdown.querySelector('.dropdown-content');
+                    if (dropdownContent) {
+                        dropdownContent.style.opacity = '0';
+                        dropdownContent.style.transform = 'translateY(-10px)';
+                        setTimeout(() => {
+                            dropdownContent.style.display = 'none';
+                        }, 400);
+                    }
+                }, 400);
+            });
+        });
+        // 点击头像跳转到个人主页
+        document.querySelectorAll('.user-avatar').forEach(avatar => {
+            avatar.addEventListener('click', () => {
+                window.location.href = "{% url 'FoodApp:profile' %}";
+            });
+        });
+    </script>
+</body>
+</html>

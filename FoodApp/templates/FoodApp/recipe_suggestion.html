@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>食谱推荐 - 膳衡方程式</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    {% load static %}
+    <style>
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        :root {
+            --primary-color: #4361ee;
+            --primary-dark: #3a56d4;
+            --primary-light: #edf2ff;
+            --secondary-color: #3f37c9;
+            --accent-color: #4cc9f0;
+            --dark-color: #35424a;
+            --light-color: #f4f4f4;
+            --success-color: #4caf50;
+            --danger-color: #f44336;
+            --warning-color: #ff9800;
+            --info-color: #2196f3;
+            --border-color: #ddd;
+            --text-color: #333;
+            --text-light: #777;
+            --shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --pulse-animation: pulse 2s infinite;
+            --bounce-animation: bounce 2s infinite;
+            --float-animation: float 3s ease-in-out infinite;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        .page-wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 添加背景装饰元素 */
+        body::before {
+            content: "";
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            opacity: 0.1;
+            animation: float 8s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        body::after {
+            content: "";
+            position: absolute;
+            bottom: -100px;
+            left: -50px;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+            opacity: 0.1;
+            animation: float 10s ease-in-out infinite reverse;
+            z-index: -1;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+            flex: 1 0 auto;
+        }
+
+        /* 导航栏样式 */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 0;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .navbar-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 700;
+            animation: var(--pulse-animation);
+        }
+
+        .logo-icon {
+            margin-right: 10px;
+            color: var(--accent-color);
+            animation: rotate 3s linear infinite;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-left: 1.5rem;
+            position: relative;
+            animation: fadeIn 0.5s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .nav-link:hover::before {
+            left: 100%;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-link i {
+            margin-right: 0.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link:hover i {
+            transform: scale(1.2);
+        }
+
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background: white;
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            z-index: 1;
+            top: 100%;
+            left: 0;
+            padding: 0.5rem 0;
+            margin-top: 0.5rem;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-content a {
+            color: var(--dark-color);
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dropdown-content a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(67, 97, 238, 0.1), transparent);
+            transition: 0.5s;
+        }
+
+        .dropdown-content a:hover::before {
+            left: 100%;
+        }
+
+        .dropdown-content a i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .dropdown-content a:hover {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            transform: translateX(5px);
+        }
+
+        .dropdown-content a:hover i {
+            transform: translateX(3px);
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 1rem;
+            object-fit: cover;
+            border: 2px solid white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: var(--float-animation);
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+
+        .btn {
+            display: inline-block;
+            background: white;
+            color: var(--primary-color);
+            padding: 10px 20px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-outline:hover {
+            background: white;
+            color: var(--primary-color);
+        }
+
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .mobile-toggle:hover {
+            transform: rotate(90deg);
+        }
+
+        .page-title {
+            text-align: center;
+            margin: 2rem 0;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .page-title h1 {
+            font-size: 2.5rem;
+            color: var(--dark-color);
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .page-title h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            border-radius: 2px;
+        }
+
+        .page-title p {
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        /* 搜索区域 */
+        .search-section {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            animation: fadeIn 0.8s ease-out;
+            text-align: center;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            border: 2px solid var(--border-color);
+            border-radius: 30px;
+            font-size: 1rem;
+            transition: var(--transition);
+            min-width: 250px;
+            max-width: 500px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        /* 加载动画 */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            border: 4px solid rgba(67, 97, 238, 0.3);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 食谱容器 */
+        .recipe-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .recipe-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .recipe-title {
+            color: var(--dark-color);
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .recipe-info {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-card {
+            background: var(--primary-light);
+            border-radius: 15px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .info-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        }
+        
+        .info-card h3 {
+            color: var(--dark-color);
+            margin-top: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+        }
+        
+        .info-card h3::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: var(--accent-color);
+            border-radius: 1.5px;
+        }
+        
+        /* 食材网格布局 */
+        .ingredients-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.2rem;
+            margin-top: 1rem;
+        }
+        
+        /* 食材卡片样式 */
+        .ingredient-card {
+            background: linear-gradient(135deg, #ffffff, #f8f9ff);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(67, 97, 238, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ingredient-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+
+        .ingredient-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 12px 25px rgba(67, 97, 238, 0.15);
+            border-color: rgba(67, 97, 238, 0.3);
+        }
+
+        .ingredient-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .ingredient-card:hover .ingredient-name {
+            color: var(--primary-color);
+        }
+
+        /* 食材名称样式 */
+        .ingredient-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            transition: color 0.3s ease;
+        }
+
+        .ingredient-name::before {
+            content: '\f0fc';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            margin-right: 12px;
+            color: var(--accent-color);
+            font-size: 1.3rem;
+            transition: transform 0.3s ease;
+        }
+
+        .ingredient-card:hover .ingredient-name::before {
+            transform: scale(1.2);
+        }
+
+        /* 食材分量样式 */
+        .ingredient-amount {
+            margin-top: auto;
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 0.5rem 1.2rem;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            align-self: flex-start;
+            box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .ingredient-card:hover .ingredient-amount {
+            box-shadow: 0 6px 15px rgba(67, 97, 238, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* 食材图标动画 */
+        .ingredient-icon {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 1.5rem;
+            color: rgba(67, 97, 238, 0.1);
+            transition: all 0.4s ease;
+        }
+
+        .ingredient-card:hover .ingredient-icon {
+            color: rgba(67, 97, 238, 0.2);
+            transform: rotate(20deg) scale(1.3);
+        }
+        
+        .basic-info {
+            background: linear-gradient(135deg, var(--primary-light), #e6f0ff);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            height: 100%;
+        }
+        
+        .basic-info h3 {
+            color: var(--dark-color);
+            margin-top: 0;
+        }
+        
+        .cooking-time {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+        
+        .steps-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 1.8rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .steps-container:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--primary-color);
+        }
+        
+        .steps-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        }
+        
+        .steps-container h3 {
+            color: var(--dark-color);
+            margin-top: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+        }
+        
+        .steps-container h3::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: var(--accent-color);
+            border-radius: 1.5px;
+        }
+
+        .steps-list {
+            list-style: none;
+            counter-reset: step-counter;
+            padding-left: 0;
+        }
+
+        .step-item {
+            display: flex;
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            background: var(--primary-light);
+            border-radius: 10px;
+            position: relative;
+            border-left: 3px solid var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        .step-item:hover {
+            background: #e0e7ff;
+            transform: translateY(-3px);
+        }
+
+        .step-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            font-weight: bold;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+            padding-top: 0.3rem;
+            color: var(--dark-color);
+            line-height: 1.7;
+        }
+
+        .tips-section, .nutrition-section, .serving-section {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 1.8rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tips-section:hover, .nutrition-section:hover, .serving-section:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .tips-section::before, .nutrition-section::before, .serving-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        }
+
+        .tips-section h3, .nutrition-section h3, .serving-section h3 {
+            color: var(--dark-color);
+            margin-top: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .tips-section h3::after, .nutrition-section h3::after, .serving-section h3::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: var(--accent-color);
+            border-radius: 1.5px;
+        }
+
+        .tips-section p, .nutrition-section p, .serving-section p {
+            color: var(--text-color);
+            line-height: 1.8;
+        }
+
+        .recipe-meta {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            color: #666;
+            margin-top: 1rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--dark-color);
+            margin: 2rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: var(--accent-color);
+            border-radius: 1.5px;
+        }
+
+        .ingredients-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .ingredient-card {
+            background: var(--primary-light);
+            border-radius: 10px;
+            padding: 1.5rem;
+            border-left: 4px solid var(--primary-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ingredient-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+
+        .ingredient-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transform: translateX(-100%);
+        }
+
+        .ingredient-card:hover::before {
+            transform: translateX(100%);
+            transition: transform 0.5s ease;
+        }
+
+        /* 推荐食谱 */
+        .popular-recipes {
+            margin-top: 2rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .recipe-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .recipe-card {
+            text-align: center;
+            padding: 1rem;
+            border-radius: 10px;
+            background: var(--primary-light);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .recipe-card:hover {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            transform: translateY(-5px);
+        }
+
+        .recipe-card:hover .recipe-icon {
+            color: white;
+        }
+
+        .recipe-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .recipe-name {
+            font-weight: 600;
+        }
+
+        /* 页脚 */
+        .footer {
+            background: var(--dark-color);
+            color: white;
+            padding: 3rem 0 1.5rem;
+            margin-top: 3rem;
+            position: relative;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        .footer-section h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: var(--accent-color);
+            border-radius: 2px;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-links a {
+            color: #ccc;
+            text-decoration: none;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+        }
+
+        .footer-links a:hover {
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .footer-links a i {
+            margin-right: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: white;
+            transition: var(--transition);
+        }
+
+        .social-links a:hover {
+            background: var(--primary-color);
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .navbar-container {
+                padding: 1rem;
+            }
+            
+            .nav-menu {
+                position: fixed;
+                left: -100%;
+                top: 70px;
+                flex-direction: column;
+                background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+                width: 100%;
+                text-align: center;
+                transition: 0.3s;
+                box-shadow: var(--shadow);
+                padding: 2rem 0;
+                margin: 0;
+            }
+
+            .nav-menu.active {
+                left: 0;
+            }
+
+            .nav-item {
+                margin: 1rem 0;
+            }
+
+            .nav-user {
+                flex-direction: column;
+            }
+
+            .user-avatar {
+                margin-right: 0;
+                margin-bottom: 1rem;
+            }
+
+            .mobile-toggle {
+                display: block;
+            }
+
+            .dropdown-content {
+                position: static;
+                display: none;
+                box-shadow: none;
+                background: rgba(255, 255, 255, 0.1);
+                margin-top: 0.5rem;
+            }
+
+            .dropdown:hover .dropdown-content {
+                display: none;
+            }
+
+            .dropdown.active .dropdown-content {
+                display: block;
+            }
+
+            .recipe-info {
+                grid-template-columns: 1fr;
+            }
+
+            .page-title h1 {
+                font-size: 2rem;
+            }
+
+            .page-title p {
+                font-size: 1rem;
+            }
+
+            .search-form {
+                flex-direction: column;
+            }
+
+            .recipe-meta {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .ingredients-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <header>
+            <div class="navbar">
+                <div class="navbar-container">
+                <a href="{% url 'FoodApp:index' %}" class="logo">
+                    <i class="fas fa-utensils logo-icon"></i>
+                    膳衡方程式
+                </a>
+                
+                <ul class="nav-menu" id="navMenu">
+                    <li class="nav-item">
+                        <a href="{% url 'FoodApp:index' %}" class="nav-link"><i class="fas fa-home"></i> 首页</a>
+                    </li>
+                    
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link"><i class="fas fa-utensils"></i> 饮食追踪 <i class="fas fa-chevron-down" style="font-size: 0.8rem; margin-left: 0.5rem;"></i></a>
+                        <div class="dropdown-content">
+                            <a href="{% url 'FoodApp:food_search' %}"><i class="fas fa-search"></i> 食物查询</a>
+                            <a href="{% url 'FoodApp:food_image_recognition' %}"><i class="fas fa-camera"></i> 图片识别</a>
+                            <a href="{% url 'FoodApp:add_meal' %}"><i class="fas fa-plus-circle"></i> 添加餐食</a>
+                            <a href="{% url 'FoodApp:nutrition_analysis' %}"><i class="fas fa-chart-pie"></i> 营养分析</a>
+                            <a href="{% url 'FoodApp:recipe_suggestion' %}"><i class="fas fa-book"></i> 食谱推荐</a>
+                            <a href="{% url 'FoodApp:meal_suggestion' %}"><i class="fas fa-lightbulb"></i> 膳食建议</a>
+                            <a href="{% url 'FoodApp:add_food' %}"><i class="fas fa-utensils"></i> 添加食物</a>
+                        </div>
+                    </li>
+                    
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link"><i class="fas fa-users"></i> 社区互动 <i class="fas fa-chevron-down" style="font-size: 0.8rem; margin-left: 0.5rem;"></i></a>
+                        <div class="dropdown-content">
+                            <a href="{% url 'FoodApp:groups' %}"><i class="fas fa-users"></i> 群组</a>
+                            <a href="{% url 'FoodApp:health_challenges' %}"><i class="fas fa-trophy"></i> 健康挑战</a>
+                            <a href="{% url 'FoodApp:activity_diary' %}"><i class="fas fa-calendar-alt"></i> 活动日记</a>
+                        </div>
+                    </li>
+                    
+                    {% if user_id %}
+                    <li class="nav-item nav-user">
+                        {% if avatar %}
+                            {{ avatar|safe }}
+                        {% else %}
+                            <div class="user-avatar" style="display: flex; align-items: center; justify-content: center; background: var(--accent-color);">
+                                <i class="fas fa-user" style="color: white;"></i>
+                            </div>
+                        {% endif %}
+                        <a href="{% url 'FoodApp:logout' %}" class="btn btn-outline">退出</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a href="{% url 'FoodApp:login' %}" class="btn">登录</a>
+                    </li>
+                    {% endif %}
+                </ul>
+                
+                <button class="mobile-toggle" id="mobileToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="page-title">
+            <h1>食谱推荐</h1>
+            <p>获取详细的食谱制作过程和营养信息</p>
+        </div>
+        
+        <section class="search-section">
+            <h2 style="margin-bottom: 1.5rem; color: var(--dark-color);">寻找美味食谱</h2>
+            <p style="margin-bottom: 2rem; color: #666;">输入您想了解的菜名，我们将为您提供详细的制作方法和营养信息</p>
+            <form method="post" class="search-form" id="recipeForm">
+                {% csrf_token %}
+                <input type="text" name="recipe_name" class="search-input" placeholder="输入菜名，如：宫保鸡丁..." value="{{ recipe_name }}" required>
+                <button type="submit" class="btn"><i class="fas fa-search"></i> 获取食谱</button>
+            </form>
+            <div style="margin-top: 1.5rem; font-size: 0.9rem; color: #888;">
+                <p><i class="fas fa-lightbulb" style="color: var(--accent-color); margin-right: 0.5rem;"></i>提示：您可以尝试输入"红烧肉"、"麻婆豆腐"、"糖醋排骨"等经典菜名</p>
+            </div>
+        </section>
+
+        <div class="loading" id="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>正在生成食谱，请稍候...</p>
+        </div>
+
+        {% if recipe_info %}
+        <div class="recipe-container" id="recipeContainer">
+            <div class="recipe-header">
+                <h2 class="recipe-title">{{ recipe_info.recipe_name }}制作指南</h2>
+            </div>
+            
+            <div class="recipe-info">
+                <div class="info-card">
+                    <h3><i class="fas fa-list"></i> 所需食材</h3>
+                    <div class="ingredients-grid">
+                        {% for ingredient in recipe_info.ingredients %}
+                        <div class="ingredient-card">
+                            <div class="ingredient-icon">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                            <div class="ingredient-name">{{ ingredient.name }}</div>
+                            <div class="ingredient-amount">{{ ingredient.amount }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="info-card">
+                    <div class="basic-info">
+                        <h3><i class="fas fa-clock"></i> 基本信息</h3>
+                        <div class="cooking-time">{{ recipe_info.cooking_time }}</div>
+                        <p>预计烹饪时间</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="steps-container">
+                <h3><i class="fas fa-edit"></i> 制作步骤</h3>
+                <ol class="steps-list">
+                    {% for step in recipe_info.steps %}
+                    <li class="step-item">
+                        <div class="step-number">{{ forloop.counter }}</div>
+                        <div class="step-content">{{ step }}</div>
+                    </li>
+                    {% endfor %}
+                </ol>
+            </div>
+            
+            {% if recipe_info.tips %}
+            <div class="tips-section">
+                <h3><i class="fas fa-lightbulb"></i> 烹饪技巧</h3>
+                <p>{{ recipe_info.tips }}</p>
+            </div>
+            {% endif %}
+            
+            {% if recipe_info.nutrition %}
+            <div class="nutrition-section">
+                <h3><i class="fas fa-apple-alt"></i> 营养价值</h3>
+                <p>{{ recipe_info.nutrition }}</p>
+            </div>
+            {% endif %}
+            
+            {% if recipe_info.serving_suggestions %}
+            <div class="serving-section">
+                <h3><i class="fas fa-utensil-spoon"></i> 食用建议</h3>
+                <p>{{ recipe_info.serving_suggestions }}</p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <script>
+            // 显示食谱结果
+            document.getElementById('recipeContainer').style.display = 'block';
+        </script>
+        {% endif %}
+        
+        <!-- 添加推荐食谱部分 -->
+        <section class="popular-recipes">
+            <h3 class="section-title">热门食谱推荐</h3>
+            <div class="recipe-grid">
+                <div class="recipe-card" onclick="searchRecipe('红烧肉')">
+                    <div class="recipe-icon">🍲</div>
+                    <div class="recipe-name">红烧肉</div>
+                </div>
+                <div class="recipe-card" onclick="searchRecipe('凉拌黄瓜')">
+                    <div class="recipe-icon">🥗</div>
+                    <div class="recipe-name">凉拌黄瓜</div>
+                </div>
+                <div class="recipe-card" onclick="searchRecipe('西红柿鸡蛋面')">
+                    <div class="recipe-icon">🍜</div>
+                    <div class="recipe-name">西红柿鸡蛋面</div>
+                </div>
+                <div class="recipe-card" onclick="searchRecipe('蛋炒饭')">
+                    <div class="recipe-icon">🍚</div>
+                    <div class="recipe-name">蛋炒饭</div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h3>膳衡方程式</h3>
+                    <p>您的个人健康饮食管理助手，致力于帮助每个人实现健康的生活方式。</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>核心功能</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'FoodApp:index' %}">首页</a></li>
+                        <li><a href="{% url 'FoodApp:food_search' %}">食物查询</a></li>
+                        <li><a href="{% url 'FoodApp:food_image_recognition' %}">图片识别</a></li>
+                        <li><a href="{% url 'FoodApp:add_meal' %}">添加餐食</a></li>
+                        <li><a href="{% url 'FoodApp:nutrition_analysis' %}">营养分析</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>智能推荐</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'FoodApp:recipe_suggestion' %}">食谱推荐</a></li>
+                        <li><a href="{% url 'FoodApp:meal_suggestion' %}">膳食建议</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>社区互动</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'FoodApp:groups' %}">群组</a></li>
+                        <li><a href="{% url 'FoodApp:health_challenges' %}">健康挑战</a></li>
+                        <li><a href="{% url 'FoodApp:activity_diary' %}">活动日记</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2025 膳衡方程式. 保留所有权利。</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 移动端菜单切换
+        const mobileToggle = document.getElementById('mobileToggle');
+        const navMenu = document.getElementById('navMenu');
+        
+        mobileToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+        
+        // 点击菜单项后关闭移动端菜单
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+            });
+        });
+        
+        // 点击头像跳转到个人主页
+        document.querySelectorAll('.user-avatar').forEach(avatar => {
+            avatar.addEventListener('click', () => {
+                window.location.href = "{% url 'FoodApp:profile' %}";
+            });
+        });
+        
+        // 添加下拉菜单功能
+        document.querySelectorAll('.dropdown > .nav-link').forEach(dropdownLink => {
+            dropdownLink.addEventListener('click', function(e) {
+                // 阻止链接的默认行为
+                e.preventDefault();
+                
+                // 获取当前下拉菜单的父元素
+                const dropdown = this.parentElement;
+                
+                // 切换当前下拉菜单的激活状态
+                dropdown.classList.toggle('active');
+                
+                // 关闭其他下拉菜单
+                document.querySelectorAll('.dropdown').forEach(otherDropdown => {
+                    if (otherDropdown !== dropdown) {
+                        otherDropdown.classList.remove('active');
+                    }
+                });
+            });
+        });
+        
+        // 点击页面其他地方时关闭下拉菜单
+        document.addEventListener('click', function(e) {
+            // 检查点击是否在下拉菜单内部
+            if (!e.target.closest('.dropdown')) {
+                // 关闭所有下拉菜单
+                document.querySelectorAll('.dropdown').forEach(dropdown => {
+                    dropdown.classList.remove('active');
+                });
+            }
+        });
+        
+        // 添加延迟显示子菜单的逻辑
+        document.querySelectorAll('.dropdown').forEach(dropdown => {
+            let timeoutId;
+            
+            dropdown.addEventListener('mouseenter', () => {
+                clearTimeout(timeoutId);
+                const dropdownContent = dropdown.querySelector('.dropdown-content');
+                if (dropdownContent) {
+                    dropdownContent.style.display = 'block';
+                    setTimeout(() => {
+                        dropdownContent.style.opacity = '1';
+                        dropdownContent.style.transform = 'translateY(0)';
+                    }, 50);
+                }
+            });
+            
+            dropdown.addEventListener('mouseleave', () => {
+                timeoutId = setTimeout(() => {
+                    const dropdownContent = dropdown.querySelector('.dropdown-content');
+                    if (dropdownContent) {
+                        dropdownContent.style.opacity = '0';
+                        dropdownContent.style.transform = 'translateY(-10px)';
+                        setTimeout(() => {
+                            dropdownContent.style.display = 'none';
+                        }, 400);
+                    }
+                }, 400);
+            });
+            
+            // 为子菜单添加事件监听器
+            const dropdownContent = dropdown.querySelector('.dropdown-content');
+            if (dropdownContent) {
+                dropdownContent.addEventListener('mouseenter', () => {
+                    clearTimeout(timeoutId);
+                });
+                
+                dropdownContent.addEventListener('mouseleave', () => {
+                    timeoutId = setTimeout(() => {
+                        dropdownContent.style.opacity = '0';
+                        dropdownContent.style.transform = 'translateY(-10px)';
+                        setTimeout(() => {
+                            dropdownContent.style.display = 'none';
+                        }, 400);
+                    }, 400);
+                });
+            }
+        });
+        
+        // 表单提交时显示加载动画
+        document.getElementById('recipeForm').addEventListener('submit', function() {
+            document.getElementById('loading').style.display = 'block';
+        });
+        
+        // 为推荐食谱添加悬停效果
+        document.querySelectorAll('.footer-section, .ingredient-card, .step-card').forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+        
+        // 初始化步骤折叠功能
+        document.addEventListener('DOMContentLoaded', function () {
+            const stepToggles = document.querySelectorAll('.step-toggle');
+            
+            stepToggles.forEach(toggle => {
+                toggle.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('data-target'));
+                    const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                    
+                    // 关闭其他所有步骤
+                    document.querySelectorAll('.collapse').forEach(collapse => {
+                        if (collapse !== target) {
+                            collapse.classList.remove('show');
+                        }
+                    });
+                    
+                    // 切换当前步骤
+                    target.classList.toggle('show');
+                    this.setAttribute('aria-expanded', !isExpanded);
+                    
+                    // 滚动到当前步骤（移动端）
+                    if (window.innerWidth <= 768) {
+                        window.scrollTo({
+                            top: this.offsetTop - 100,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+        });
+        
+        // 搜索食谱函数
+        function searchRecipe(recipeName) {
+            // 创建一个表单并提交
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '';
+            
+            // 添加CSRF令牌
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+            if (csrfToken) {
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrfmiddlewaretoken';
+                csrfInput.value = csrfToken.value;
+                form.appendChild(csrfInput);
+            }
+            
+            // 添加食谱名称
+            const recipeInput = document.createElement('input');
+            recipeInput.type = 'hidden';
+            recipeInput.name = 'recipe_name';
+            recipeInput.value = recipeName;
+            form.appendChild(recipeInput);
+            
+            // 将表单添加到页面并提交
+            document.body.appendChild(form);
+            form.submit();
+        }
+    </script>
+</body>
+</html>

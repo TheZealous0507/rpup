@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>创建挑战 - {{ group.name }} - FoodApp</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-dark: #3a56d4;
+            --primary-light: #edf2ff;
+            --secondary-color: #3f37c9;
+            --accent-color: #4cc9f0;
+            --dark-color: #35424a;
+            --light-color: #f4f4f4;
+            --success-color: #4caf50;
+            --danger-color: #f44336;
+            --warning-color: #ff9800;
+            --info-color: #2196f3;
+            --border-color: #ddd;
+            --text-color: #333;
+            --text-light: #777;
+            --shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --pulse-animation: pulse 2s infinite;
+            --bounce-animation: bounce 2s infinite;
+            --float-animation: float 3s ease-in-out infinite;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #35424a 0%, #2c3e50 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 3px solid var(--primary-color);
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .logo span {
+            color: var(--primary-color);
+        }
+
+        .logo-icon {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-left: 1.5rem;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        nav ul li a i {
+            margin-right: 5px;
+        }
+
+        nav ul li a:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        nav ul li a:hover:before {
+            left: 100%;
+        }
+
+        nav ul li a:hover {
+            background-color: rgba(232, 73, 29, 0.3);
+            transform: translateY(-3px);
+        }
+
+        .page-title {
+            text-align: center;
+            margin: 30px 0;
+            color: var(--dark-color);
+        }
+
+        .page-title h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .page-title p {
+            color: #666;
+            font-size: 1.2rem;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .form-section {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 30px;
+            margin-bottom: 30px;
+            border-top: 5px solid var(--primary-color);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .section-header i {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-right: 15px;
+        }
+
+        .section-header h2 {
+            color: var(--secondary-color);
+            font-size: 1.8rem;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(232, 73, 29, 0.2);
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1em;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #495057);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .message {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 500;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .message.info {
+            background: linear-gradient(135deg, #d1ecf1, #a3d9e4);
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .message.error {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message.success {
+            background: linear-gradient(135deg, #d4edda, #a3d9b5);
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            nav ul {
+                margin-top: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            nav ul li {
+                margin: 5px;
+            }
+
+            .page-title h1 {
+                font-size: 2rem;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-utensils logo-icon"></i>
+                Food<span>App</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="{% url 'FoodApp:index' %}"><i class="fas fa-home"></i> 首页</a></li>
+                    <li><a href="{% url 'FoodApp:food_search' %}"><i class="fas fa-search"></i> 食物查询</a></li>
+                    <li><a href="{% url 'FoodApp:food_image_recognition' %}"><i class="fas fa-camera"></i> 图片识别</a></li>
+                    <li><a href="{% url 'FoodApp:groups' %}"><i class="fas fa-users"></i> 群组</a></li>
+                    <li><a href="{% url 'FoodApp:add_meal' %}"><i class="fas fa-plus-circle"></i> 添加餐食</a></li>
+                    <li><a href="{% url 'FoodApp:nutrition_analysis' %}"><i class="fas fa-chart-pie"></i> 营养分析</a></li>
+                    <li><a href="{% url 'FoodApp:calorie_calculator' %}"><i class="fas fa-calculator"></i> 卡路里计算</a></li>
+                    <li><a href="{% url 'FoodApp:diet_charts' %}"><i class="fas fa-chart-line"></i> 饮食图表</a></li>
+                    {% if user_id %}
+                        <li><a href="{% url 'FoodApp:logout' %}"><i class="fas fa-sign-out-alt"></i> 退出 ({{ username }})</a></li>
+                    {% else %}
+                        <li><a href="{% url 'FoodApp:login' %}"><i class="fas fa-sign-in-alt"></i> 登录</a></li>
+                        <li><a href="{% url 'FoodApp:register' %}"><i class="fas fa-user-plus"></i> 注册</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="page-title">
+            <h1><i class="fas fa-trophy"></i> 创建挑战</h1>
+            <p>在群组 "{{ group.name }}" 中创建新的健康挑战</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message {{ message.tags }}"><i class="fas fa-info-circle"></i> {{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="form-section">
+            <div class="section-header">
+                <i class="fas fa-trophy"></i>
+                <h2>挑战信息</h2>
+            </div>
+            
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="name"><i class="fas fa-tag"></i> 挑战名称 *</label>
+                    <input type="text" id="name" name="name" class="form-control" required placeholder="请输入挑战名称">
+                </div>
+                
+                <div class="form-group">
+                    <label for="description"><i class="fas fa-align-left"></i> 挑战描述</label>
+                    <textarea id="description" name="description" class="form-control" placeholder="请输入挑战描述（可选）"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="challenge_type"><i class="fas fa-list"></i> 挑战类型 *</label>
+                    <select id="challenge_type" name="challenge_type" class="form-control" required>
+                        <option value="">请选择挑战类型</option>
+                        <option value="Calorie Intake">热量摄入挑战</option>
+                        <option value="Exercise">运动挑战</option>
+                        <option value="Water Intake">饮水挑战</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="target_value"><i class="fas fa-bullseye"></i> 目标值 *</label>
+                    <input type="number" id="target_value" name="target_value" class="form-control" required placeholder="请输入目标值" step="0.01">
+                    <small>热量摄入（千卡）、运动（分钟）或饮水（毫升）</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="start_date"><i class="fas fa-calendar-start"></i> 开始日期 *</label>
+                    <input type="date" id="start_date" name="start_date" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="end_date"><i class="fas fa-calendar-check"></i> 结束日期 *</label>
+                    <input type="date" id="end_date" name="end_date" class="form-control" required>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn">
+                        <i class="fas fa-plus-circle"></i> 创建挑战
+                    </button>
+                    <a href="{% url 'FoodApp:group_detail' group_id %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> 返回群组
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 设置默认日期
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date();
+            const startDateInput = document.getElementById('start_date');
+            const endDateInput = document.getElementById('end_date');
+            
+            // 格式化日期为 YYYY-MM-DD
+            const formatDate = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+            
+            // 设置开始日期为今天
+            startDateInput.value = formatDate(today);
+            
+            // 设置结束日期为7天后
+            const endDate = new Date();
+            endDate.setDate(today.getDate() + 7);
+            endDateInput.value = formatDate(endDate);
+        });
+    </script>
+</body>
+</html>

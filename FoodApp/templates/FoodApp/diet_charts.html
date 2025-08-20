@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>饮食图表 - 膳衡方程式</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-dark: #3a56d4;
+            --primary-light: #edf2ff;
+            --secondary-color: #3f37c9;
+            --accent-color: #4cc9f0;
+            --dark-color: #35424a;
+            --light-color: #f4f4f4;
+            --success-color: #4caf50;
+            --danger-color: #f44336;
+            --warning-color: #ff9800;
+            --info-color: #2196f3;
+            --border-color: #ddd;
+            --text-color: #333;
+            --text-light: #777;
+            --shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --pulse-animation: pulse 2s infinite;
+            --bounce-animation: bounce 2s infinite;
+            --float-animation: float 3s ease-in-out infinite;
+        }
+        
+        .charts-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .charts-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .charts-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .charts-title {
+            font-size: 2rem;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .charts-description {
+            color: #666;
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .date-selector {
+            background: var(--primary-light);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .date-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .date-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+        
+        .date-btn:hover {
+            background: var(--primary-dark);
+            transform: scale(1.1);
+        }
+        
+        .date-display {
+            font-size: 1.5rem;
+            font-weight: 600;
+            min-width: 200px;
+        }
+        
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .chart-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+        }
+        
+        .chart-header {
+            text-align: center;
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary-light), #e0e7ff);
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: var(--dark-color);
+            font-weight: 500;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+        
+        .no-data i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #ccc;
+        }
+        
+        @media (max-width: 768px) {
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <div class="navbar-container">
+                <a href="{% url 'FoodApp:index' %}" class="logo">
+                    <i class="fas fa-utensils logo-icon"></i>
+                    膳衡方程式
+                </a>
+                
+                <ul class="nav-menu" id="navMenu">
+                    <li class="nav-item">
+                        <a href="{% url 'FoodApp:index' %}" class="nav-link"><i class="fas fa-home"></i> 首页</a>
+                    </li>
+                    
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link"><i class="fas fa-utensils"></i> 饮食追踪 <i class="fas fa-chevron-down" style="font-size: 0.8rem; margin-left: 0.5rem;"></i></a>
+                        <div class="dropdown-content">
+                            <a href="{% url 'FoodApp:food_search' %}"><i class="fas fa-search"></i> 食物查询</a>
+                            <a href="{% url 'FoodApp:food_image_recognition' %}"><i class="fas fa-camera"></i> 图片识别</a>
+                            <a href="{% url 'FoodApp:add_meal' %}"><i class="fas fa-plus-circle"></i> 添加餐食</a>
+                            <a href="{% url 'FoodApp:nutrition_analysis' %}"><i class="fas fa-chart-pie"></i> 营养分析</a>
+                            <a href="{% url 'FoodApp:recipe_suggestion' %}"><i class="fas fa-book"></i> 食谱推荐</a>
+                            <a href="{% url 'FoodApp:meal_suggestion' %}"><i class="fas fa-lightbulb"></i> 膳食建议</a>
+                            <a href="{% url 'FoodApp:add_food' %}"><i class="fas fa-utensils"></i> 添加食物</a>
+                        </div>
+                    </li>
+                    
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link"><i class="fas fa-users"></i> 社区互动 <i class="fas fa-chevron-down" style="font-size: 0.8rem; margin-left: 0.5rem;"></i></a>
+                        <div class="dropdown-content">
+                            <a href="{% url 'FoodApp:groups' %}"><i class="fas fa-users"></i> 群组</a>
+                            <a href="#"><i class="fas fa-trophy"></i> 健康挑战</a>
+                            <a href="#"><i class="fas fa-calendar-alt"></i> 活动日历</a>
+                        </div>
+                    </li>
+                    
+                    {% if user_id %}
+                    <li class="nav-item nav-user">
+                        {% if avatar %}
+                            {{ avatar|safe }}
+                        {% else %}
+                            <div class="user-avatar" style="display: flex; align-items: center; justify-content: center; background: var(--accent-color);">
+                                <i class="fas fa-user" style="color: white;"></i>
+                            </div>
+                        {% endif %}
+                        <a href="{% url 'FoodApp:logout' %}" class="btn btn-outline">退出</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a href="{% url 'FoodApp:login' %}" class="btn">登录</a>
+                    </li>
+                    {% endif %}
+                </ul>
+                
+                <button class="mobile-toggle" id="mobileToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="page-title">
+            <h1><i class="fas fa-chart-bar"></i> 饮食图表</h1>
+            <p>可视化展示您的饮食数据和营养摄入情况</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message {{ message.tags }}"><i class="fas fa-info-circle"></i> {{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="charts-container">
+            <div class="charts-header">
+                <div class="charts-icon">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <h1 class="charts-title">饮食数据分析</h1>
+                <p class="charts-description">
+                    通过图表形式展示您的饮食习惯和营养摄入情况，帮助您更好地了解和管理自己的健康状况。
+                </p>
+            </div>
+
+            <div class="date-selector">
+                <form method="GET" id="dateForm">
+                    <div class="date-controls">
+                        <button type="button" class="date-btn" onclick="changeDate(-7)">
+                            <i class="fas fa-angle-double-left"></i>
+                        </button>
+                        <button type="button" class="date-btn" onclick="changeDate(-1)">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <div class="date-display">{{ start_date }} 至 {{ end_date }}</div>
+                        <button type="button" class="date-btn" onclick="changeDate(1)">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        <button type="button" class="date-btn" onclick="changeDate(7)">
+                            <i class="fas fa-angle-double-right"></i>
+                        </button>
+                    </div>
+                    <input type="hidden" name="start_date" id="startDate" value="{{ start_date }}">
+                    <input type="hidden" name="end_date" id="endDate" value="{{ end_date }}">
+                </form>
+            </div>
+
+            {% if chart_data %}
+            <div class="chart-grid">
+                <div class="chart-card">
+                    <h3 class="chart-header">热量摄入趋势</h3>
+                    <div class="chart-container">
+                        <canvas id="caloriesChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <h3 class="chart-header">营养成分分布</h3>
+                    <div class="chart-container">
+                        <canvas id="nutrientsChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <h3 class="chart-header">餐食类型分布</h3>
+                    <div class="chart-container">
+                        <canvas id="mealsChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <h3 class="chart-header">周摄入对比</h3>
+                    <div class="chart-container">
+                        <canvas id="weeklyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">{{ chart_data.average_calories|floatformat:0 }}</div>
+                    <div class="stat-label">日均热量 (千卡)</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-value">{{ chart_data.total_protein|floatformat:1 }}</div>
+                    <div class="stat-label">蛋白质 (克)</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-value">{{ chart_data.total_carbs|floatformat:1 }}</div>
+                    <div class="stat-label">碳水化合物 (克)</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-value">{{ chart_data.total_fat|floatformat:1 }}</div>
+                    <div class="stat-label">脂肪 (克)</div>
+                </div>
+            </div>
+            {% else %}
+            <div class="no-data">
+                <i class="fas fa-chart-bar"></i>
+                <h3>暂无数据</h3>
+                <p>在选定的时间范围内没有找到饮食记录</p>
+                <a href="{% url 'FoodApp:add_meal' %}" class="btn" style="margin-top: 1rem;">
+                    <i class="fas fa-plus"></i> 添加餐食记录
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h3>膳衡方程式</h3>
+                    <p>您的个人健康饮食管理助手，致力于帮助每个人实现健康的生活方式。</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>核心功能</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'FoodApp:index' %}">首页</a></li>
+                        <li><a href="{% url 'FoodApp:food_search' %}">食物查询</a></li>
+                        <li><a href="{% url 'FoodApp:food_image_recognition' %}">图片识别</a></li>
+                        <li><a href="{% url 'FoodApp:add_meal' %}">添加餐食</a></li>
+                        <li><a href="{% url 'FoodApp:nutrition_analysis' %}">营养分析</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>智能推荐</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'FoodApp:recipe_suggestion' %}">食谱推荐</a></li>
+                        <li><a href="{% url 'FoodApp:meal_suggestion' %}">膳食建议</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>社区互动</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'FoodApp:groups' %}">群组</a></li>
+                        <li><a href="{% url 'FoodApp:health_challenges' %}">健康挑战</a></li>
+                        <li><a href="{% url 'FoodApp:activity_diary' %}">活动日记</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2025 膳衡方程式. 保留所有权利。</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 移动端菜单切换
+        const mobileToggle = document.getElementById('mobileToggle');
+        const navMenu = document.getElementById('navMenu');
+        
+        mobileToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+        
+        // 点击菜单项后关闭移动端菜单
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+            });
+        });
+        
+        // 点击头像跳转到个人主页
+        document.querySelectorAll('.user-avatar').forEach(avatar => {
+            avatar.addEventListener('click', () => {
+                window.location.href = "{% url 'FoodApp:profile' %}";
+            });
+        });
+        
+        // 添加下拉菜单功能
+        document.querySelectorAll('.dropdown > .nav-link').forEach(dropdownLink => {
+            dropdownLink.addEventListener('click', function(e) {
+                // 阻止链接的默认行为
+                e.preventDefault();
+                
+                // 获取当前下拉菜单的父元素
+                const dropdown = this.parentElement;
+                
+                // 切换当前下拉菜单的激活状态
+                dropdown.classList.toggle('active');
+                
+                // 关闭其他下拉菜单
+                document.querySelectorAll('.dropdown').forEach(otherDropdown => {
+                    if (otherDropdown !== dropdown) {
+                        otherDropdown.classList.remove('active');
+                    }
+                });
+            });
+        });
+        
+        // 点击页面其他地方时关闭下拉菜单
+        document.addEventListener('click', function(e) {
+            // 检查点击是否在下拉菜单内部
+            if (!e.target.closest('.dropdown')) {
+                // 关闭所有下拉菜单
+                document.querySelectorAll('.dropdown').forEach(dropdown => {
+                    dropdown.classList.remove('active');
+                });
+            }
+        });
+        
+        // 添加延迟显示子菜单的逻辑
+        document.querySelectorAll('.dropdown').forEach(dropdown => {
+            let timeoutId;
+            
+            dropdown.addEventListener('mouseenter', () => {
+                clearTimeout(timeoutId);
+                const dropdownContent = dropdown.querySelector('.dropdown-content');
+                if (dropdownContent) {
+                    dropdownContent.style.display = 'block';
+                    setTimeout(() => {
+                        dropdownContent.style.opacity = '1';
+                        dropdownContent.style.transform = 'translateY(0)';
+                    }, 50);
+                }
+            });
+            
+            dropdown.addEventListener('mouseleave', () => {
+                timeoutId = setTimeout(() => {
+                    const dropdownContent = dropdown.querySelector('.dropdown-content');
+                    if (dropdownContent) {
+                        dropdownContent.style.opacity = '0';
+                        dropdownContent.style.transform = 'translateY(-10px)';
+                        setTimeout(() => {
+                            dropdownContent.style.display = 'none';
+                        }, 300);
+                    }
+                }, 300);
+            });
+            
+            // 为子菜单添加事件监听器
+            const dropdownContent = dropdown.querySelector('.dropdown-content');
+            if (dropdownContent) {
+                dropdownContent.addEventListener('mouseenter', () => {
+                    clearTimeout(timeoutId);
+                });
+                
+                dropdownContent.addEventListener('mouseleave', () => {
+                    timeoutId = setTimeout(() => {
+                        dropdownContent.style.opacity = '0';
+                        dropdownContent.style.transform = 'translateY(-10px)';
+                        setTimeout(() => {
+                            dropdownContent.style.display = 'none';
+                        }, 300);
+                    }, 300);
+                });
+            }
+        });
+        
+        // 日期范围改变时提交表单
+        function submitDateRange() {
+            document.getElementById('dateRangeForm').submit();
+        }
+        
+        // 重置日期范围
+        function resetDateRange() {
+            const today = new Date();
+            const startDate = new Date(today);
+            startDate.setDate(today.getDate() - 6);
+            
+            document.getElementById('start_date').value = startDate.toISOString().split('T')[0];
+            document.getElementById('end_date').value = today.toISOString().split('T')[0];
+            document.getElementById('dateRangeForm').submit();
+        }
+    </script>
+</body>
+</html>

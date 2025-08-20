@@ -1,0 +1,1655 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人资料 - 膳衡方程式</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-dark: #3a56d4;
+            --primary-light: #edf2ff;
+            --secondary-color: #3f37c9;
+            --accent-color: #4cc9f0;
+            --dark-color: #35424a;
+            --light-color: #f4f4f4;
+            --success-color: #4caf50;
+            --danger-color: #f44336;
+            --warning-color: #ff9800;
+            --info-color: #2196f3;
+            --border-color: #ddd;
+            --text-color: #333;
+            --text-light: #777;
+            --shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --pulse-animation: pulse 2s infinite;
+            --bounce-animation: bounce 2s infinite;
+            --float-animation: float 3s ease-in-out infinite;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        /* 页面标题 */
+        .page-title {
+            text-align: center;
+            margin: 2rem 0;
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        .page-title h1 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .page-title p {
+            color: var(--text-light);
+            font-size: 1.2rem;
+        }
+        
+        /* 消息提示 */
+        .message {
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .message.success {
+            background-color: rgba(76, 175, 80, 0.2);
+            border: 1px solid var(--success-color);
+            color: var(--success-color);
+        }
+        
+        .message.error {
+            background-color: rgba(244, 67, 54, 0.2);
+            border: 1px solid var(--danger-color);
+            color: var(--danger-color);
+        }
+        
+        .message.warning {
+            background-color: rgba(255, 152, 0, 0.2);
+            border: 1px solid var(--warning-color);
+            color: var(--warning-color);
+        }
+        
+        .message.info {
+            background-color: rgba(33, 150, 243, 0.2);
+            border: 1px solid var(--info-color);
+            color: var(--info-color);
+        }
+        
+        /* 个人资料头部 */
+        .profile-header {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        .profile-header::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            opacity: 0.1;
+            animation: float 8s ease-in-out infinite;
+            z-index: 0;
+        }
+        
+        .profile-header::after {
+            content: '';
+            position: absolute;
+            bottom: -100px;
+            left: -50px;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+            opacity: 0.1;
+            animation: float 10s ease-in-out infinite reverse;
+            z-index: 0;
+        }
+        
+        .avatar-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+            z-index: 1;
+        }
+        
+        .profile-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid var(--primary-light);
+            box-shadow: var(--shadow);
+        }
+        
+        .avatar-upload {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        
+        .avatar-upload:hover {
+            background: var(--primary-dark);
+            transform: scale(1.1);
+        }
+        
+        .profile-name {
+            color: var(--dark-color);
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            z-index: 1;
+            position: relative;
+        }
+        
+        .profile-header p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            z-index: 1;
+            position: relative;
+        }
+        
+        /* 统计数据 */
+        .profile-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            z-index: 1;
+            position: relative;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--primary-light);
+            border-radius: 15px;
+            min-width: 120px;
+            transition: var(--transition);
+        }
+        
+        .stat-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            font-size: 1rem;
+            color: var(--text-light);
+        }
+        
+        /* 标签页 */
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 15px 15px 0 0;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin-bottom: 0;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 1.2rem;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-light);
+            transition: var(--transition);
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab:hover {
+            background: var(--primary-light);
+            color: var(--primary-color);
+        }
+        
+        .tab.active {
+            background: var(--primary-color);
+            color: white;
+            border-bottom: 3px solid var(--accent-color);
+        }
+        
+        /* 标签内容 */
+        .tab-content {
+            display: none;
+            background: white;
+            border-radius: 0 0 15px 15px;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* 信息网格 */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .info-card {
+            background: var(--primary-light);
+            border-radius: 15px;
+            padding: 1.8rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .info-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        }
+        
+        .info-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .info-header i {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+        
+        .info-header h3 {
+            color: var(--dark-color);
+            margin: 0;
+        }
+        
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .info-item:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+        
+        .info-value {
+            color: var(--text-light);
+        }
+        
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-outline:hover {
+            background: white;
+            color: var(--primary-color);
+        }
+
+        /* 活动记录 */
+        .activity-list {
+            list-style: none;
+        }
+
+        .activity-item {
+            display: flex;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            background: var(--primary-light);
+            border-radius: 10px;
+            transition: var(--transition);
+        }
+
+        .activity-item:hover {
+            transform: translateX(5px);
+            background: #e0e7ff;
+        }
+
+        .activity-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            margin-right: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: var(--dark-color);
+        }
+
+        .activity-time {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .no-activity {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-light);
+        }
+
+        .no-activity i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--border-color);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .page-title h1 {
+                font-size: 2rem;
+            }
+
+            .page-title p {
+                font-size: 1rem;
+            }
+
+            .profile-header {
+                padding: 1.5rem;
+            }
+
+            .profile-avatar {
+                width: 120px;
+                height: 120px;
+            }
+
+            .profile-name {
+                font-size: 1.5rem;
+            }
+
+            .profile-stats {
+                gap: 1rem;
+            }
+
+            .stat-item {
+                padding: 1rem;
+                min-width: 90px;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tab {
+                padding: 1rem;
+                font-size: 0.9rem;
+            }
+
+            .info-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 0.5rem;
+            }
+        }
+
+        /* 动画 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* 导航栏样式 */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1rem 0;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            transition: var(--transition);
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo-icon {
+            margin-right: 0.5rem;
+            animation: var(--pulse-animation);
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            align-items: center;
+        }
+
+        .nav-item {
+            margin-left: 1.5rem;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .nav-link i {
+            margin-right: 0.5rem;
+        }
+
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background: white;
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            z-index: 1;
+            top: 100%;
+            left: 0;
+            padding: 0.5rem 0;
+        }
+
+        .dropdown-content a {
+            color: var(--dark-color);
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .dropdown-content a:hover {
+            background-color: var(--primary-light);
+        }
+
+        .dropdown-content a i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 1rem;
+            object-fit: cover;
+            border: 2px solid white;
+            cursor: pointer;
+        }
+
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* 页脚 */
+        .footer {
+            background: var(--dark-color);
+            color: white;
+            padding: 3rem 0 0;
+            margin-top: 0;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color), var(--accent-color));
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 0;
+        }
+
+        .footer-section h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--accent-color);
+            position: relative;
+            display: inline-block;
+        }
+
+        .footer-section h3::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background: var(--primary-color);
+            border-radius: 1.5px;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.5rem;
+            position: relative;
+            padding-left: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .footer-links li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--accent-color);
+            transition: all 0.3s ease;
+        }
+
+        .footer-links li:hover {
+            padding-left: 20px;
+            transform: translateX(5px);
+        }
+
+        .footer-links li:hover::before {
+            color: var(--primary-color);
+        }
+
+        .footer-links a {
+            color: #ccc;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: white;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .social-links a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: 0.5s;
+        }
+
+        .social-links a:hover::before {
+            left: 100%;
+        }
+
+        .social-links a:hover {
+            background: var(--accent-color);
+            transform: translateY(-3px) rotate(10deg);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #aaa;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <div class="navbar-container">
+                <a href="{% url 'FoodApp:index' %}" class="logo">
+                    <i class="fas fa-utensils logo-icon"></i>
+                    膳衡方程式
+                </a>
+
+                <ul class="nav-menu" id="navMenu">
+                    <li class="nav-item">
+                        <a href="{% url 'FoodApp:index' %}" class="nav-link"><i class="fas fa-home"></i> 首页</a>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link"><i class="fas fa-utensils"></i> 饮食追踪 <i class="fas fa-chevron-down" style="font-size: 0.8rem; margin-left: 0.5rem;"></i></a>
+                        <div class="dropdown-content">
+                            <a href="{% url 'FoodApp:food_search' %}"><i class="fas fa-search"></i> 食物查询</a>
+                            <a href="{% url 'FoodApp:food_image_recognition' %}"><i class="fas fa-camera"></i> 图片识别</a>
+                            <a href="{% url 'FoodApp:add_meal' %}"><i class="fas fa-plus-circle"></i> 添加餐食</a>
+                            <a href="{% url 'FoodApp:nutrition_analysis' %}"><i class="fas fa-chart-pie"></i> 营养分析</a>
+                            <a href="{% url 'FoodApp:recipe_suggestion' %}"><i class="fas fa-book"></i> 食谱推荐</a>
+                            <a href="{% url 'FoodApp:meal_suggestion' %}"><i class="fas fa-lightbulb"></i> 膳食建议</a>
+                            <a href="{% url 'FoodApp:add_food' %}"><i class="fas fa-utensils"></i> 添加食物</a>
+                        </div>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link"><i class="fas fa-users"></i> 社区互动 <i class="fas fa-chevron-down" style="font-size: 0.8rem; margin-left: 0.5rem;"></i></a>
+                        <div class="dropdown-content">
+                            <a href="{% url 'FoodApp:groups' %}"><i class="fas fa-users"></i> 群组</a>
+                            <a href="{% url 'FoodApp:health_challenges' %}"><i class="fas fa-trophy"></i> 健康挑战</a>
+                            <a href="{% url 'FoodApp:activity_diary' %}"><i class="fas fa-calendar-alt"></i> 活动日记</a>
+                        </div>
+                    </li>
+
+                    {% if user_id %}
+                    <li class="nav-item nav-user">
+                        {% if avatar %}
+                            {{ avatar|safe }}
+                        {% else %}
+                            <div class="user-avatar" style="display: flex; align-items: center; justify-content: center; background: var(--accent-color);">
+                                <i class="fas fa-user" style="color: white;"></i>
+                            </div>
+                        {% endif %}
+                        <a href="{% url 'FoodApp:logout' %}" class="btn btn-outline">退出</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a href="{% url 'FoodApp:login' %}" class="btn">登录</a>
+                    </li>
+                    {% endif %}
+                </ul>
+
+                <button class="mobile-toggle" id="mobileToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="page-title">
+            <h1><i class="fas fa-user"></i> 个人资料</h1>
+            <p>查看和管理您的个人信息</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                {% if "头像" in message|stringformat:"s" or "资料" in message|stringformat:"s" or "目标" in message|stringformat:"s" %}
+                <div class="message {{ message.tags }}"><i class="fas fa-info-circle"></i> {{ message }}</div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+
+        <div class="profile-header">
+            <div class="avatar-container">
+                {% if user.avatar %}
+                <img src="/media/avatars/{{ user.avatar }}" alt="头像" class="profile-avatar">
+                {% else %}
+                <div class="profile-avatar" style="display: flex; align-items: center; justify-content: center; background: var(--accent-color); color: white; font-size: 3rem;">
+                    <i class="fas fa-user"></i>
+                </div>
+                {% endif %}
+                <div class="avatar-upload" onclick="document.getElementById('avatarInput').click()">
+                    <i class="fas fa-camera"></i>
+                </div>
+                <form id="avatarForm" method="POST" enctype="multipart/form-data" style="display: none;">
+                    {% csrf_token %}
+                    <input type="file" id="avatarInput" name="avatar" accept="image/*" onchange="uploadAvatar()">
+                </form>
+            </div>
+            <h2 class="profile-name">{{ user.full_name }}</h2>
+            <p>注册于 {{ user.created_at }}</p>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('info')" >基本信息</div>
+            <div class="tab" onclick="switchTab('goals')">健康目标</div>
+            <div class="tab" onclick="switchTab('activity')">活动记录</div>
+        </div>
+
+        <div id="info" class="tab-content active">
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-header">
+                        <i class="fas fa-user-circle"></i>
+                        <h3>个人资料</h3>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">用户名</span>
+                        <span class="info-value">{{ user.username }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">注册时间</span>
+                        <span class="info-value">{{ user.created_at }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">最后登录</span>
+                        <span class="info-value">{{ user.updated_at }}</span>
+                    </div>
+                </div>
+
+                {% if personal_info %}
+                <div class="info-card">
+                    <div class="info-header">
+                        <i class="fas fa-heartbeat"></i>
+                        <h3>身体信息</h3>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">性别</span>
+                        <span class="info-value">{{ personal_info.gender }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">年龄</span>
+                        <span class="info-value">{{ personal_info.age }} 岁</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">身高</span>
+                        <span class="info-value">{{ personal_info.height }} cm</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">体重</span>
+                        <span class="info-value">{{ personal_info.weight }} kg</span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            <div class="info-card">
+                <div class="info-header">
+                    <i class="fas fa-edit"></i>
+                    <h3>编辑资料</h3>
+                </div>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="info-grid">
+                        <div>
+                            <div class="form-group">
+                                <label for="username">用户名</label>
+                                <input type="text" id="username" name="username" class="form-control" value="{{ user.username }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">邮箱</label>
+                                <input type="email" id="email" name="email" class="form-control" value="{{ user.email|default:'' }}">
+                            </div>
+                        </div>
+                        {% if personal_info %}
+                        <div>
+                            <div class="form-group">
+                                <label for="age">年龄</label>
+                                <input type="number" id="age" name="age" class="form-control" value="{{ personal_info.age }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="height">身高 (cm)</label>
+                                <input type="number" id="height" name="height" class="form-control" value="{{ personal_info.height }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="weight">体重 (kg)</label>
+                                <input type="number" id="weight" name="weight" class="form-control" value="{{ personal_info.weight }}" step="0.1">
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="btn-group">
+                        <button type="submit" class="btn"><i class="fas fa-save"></i> 保存更改</button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="info-card">
+                <div class="info-header">
+                    <i class="fas fa-lock"></i>
+                    <h3>修改密码</h3>
+                </div>
+                <button id="togglePasswordForm" class="btn" style="margin-bottom: 1rem;">
+                    <i class="fas fa-edit"></i> 修改密码
+                </button>
+                
+                <div id="passwordChangeForm" class="password-change-form">
+                    <form method="POST" action="{% url 'FoodApp:change_password' %}" onsubmit="return validatePasswordForm()">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="current_password">当前密码</label>
+                            <input type="password" class="form-control" id="current_password" name="current_password" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="new_password">新密码</label>
+                            <input type="password" class="form-control" id="new_password" name="new_password" required minlength="6">
+                            <small class="form-text text-muted">密码长度至少为6位</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="confirm_password">确认新密码</label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required minlength="6">
+                        </div>
+                        
+                        <button type="submit" class="btn btn-block">
+                            <i class="fas fa-save"></i> 保存新密码
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div id="goals" class="tab-content">
+            {% if goals %}
+            <div class="goals-grid">
+                <div class="goal-card">
+                    <div class="goal-icon">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <div class="goal-title">每日热量</div>
+                    <div class="goal-value">{{ goals.daily_calories }}</div>
+                    <div class="goal-unit">千卡</div>
+                </div>
+
+                <div class="goal-card">
+                    <div class="goal-icon">
+                        <i class="fas fa-weight"></i>
+                    </div>
+                    <div class="goal-title">目标体重</div>
+                    <div class="goal-value">{{ goals.target_weight }}</div>
+                    <div class="goal-unit">公斤</div>
+                </div>
+
+                <div class="goal-card">
+                    <div class="goal-icon">
+                        <i class="fas fa-running"></i>
+                    </div>
+                    <div class="goal-title">每周运动</div>
+                    <div class="goal-value">{{ goals.weekly_exercise }}</div>
+                    <div class="goal-unit">天</div>
+                </div>
+            </div>
+
+            <div class="info-card" style="margin-top: 2rem;">
+                <div class="info-header">
+                    <i class="fas fa-bullseye"></i>
+                    <h3>编辑健康目标</h3>
+                </div>
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="form_type" value="goals">
+                    <div class="info-grid">
+                        <div class="form-group">
+                            <label for="daily_calories">每日热量目标 (千卡)</label>
+                            <input type="number" id="daily_calories" name="daily_calories" class="form-control" value="{{ goals.daily_calories }}" min="1" max="5000">
+                        </div>
+                        <div class="form-group">
+                            <label for="target_weight">目标体重 (公斤)</label>
+                            <input type="number" id="target_weight" name="target_weight" class="form-control" value="{{ goals.target_weight }}" step="0.1" min="30" max="300">
+                        </div>
+                        <div class="form-group">
+                            <label for="weekly_exercise">每周运动天数</label>
+                            <input type="number" id="weekly_exercise" name="weekly_exercise" class="form-control" value="{{ goals.weekly_exercise }}" min="0" max="7">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn"><i class="fas fa-save"></i> 更新目标</button>
+                </form>
+            </div>
+            {% else %}
+            <div class="no-activity">
+                <i class="fas fa-bullseye fa-3x" style="margin-bottom: 1rem; color: #ccc;"></i>
+                <h3>暂未设置健康目标</h3>
+                <p>设置健康目标可以帮助您更好地管理健康</p>
+                <button class="btn" style="margin-top: 1rem;" onclick="switchTab('goals')">
+                    <i class="fas fa-plus"></i> 设置目标
+                </button>
+            </div>
+            {% endif %}
+        </div>
+
+        <div id="activity" class="tab-content">
+            {% if activities %}
+            <div class="info-card">
+                <div class="info-header">
+                    <i class="fas fa-history"></i>
+                    <h3>最近活动</h3>
+                </div>
+                <ul class="activity-list">
+                    {% for activity in activities %}
+                    <li class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-{{ activity.icon }}"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">{{ activity.title }}</div>
+                            <div class="activity-time">{{ activity.time }}</div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% else %}
+            <div class="no-activity">
+                <i class="fas fa-history fa-3x" style="margin-bottom: 1rem; color: #ccc;"></i>
+                <h3>暂无活动记录</h3>
+                <p>您的活动记录将显示在这里</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h3>膳衡方程式</h3>
+                    <p>您的个人健康饮食管理助手，致力于帮助每个人实现健康的生活方式。</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h3>核心功能</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'FoodApp:index' %}">首页</a></li>
+                        <li><a href="{% url 'FoodApp:food_search' %}">食物查询</a></li>
+                        <li><a href="{% url 'FoodApp:food_image_recognition' %}">图片识别</a></li>
+                        <li><a href="{% url 'FoodApp:add_meal' %}">添加餐食</a></li>
+                        <li><a href="{% url 'FoodApp:nutrition_analysis' %}">营养分析</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3>智能推荐</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'FoodApp:recipe_suggestion' %}">食谱推荐</a></li>
+                        <li><a href="{% url 'FoodApp:meal_suggestion' %}">膳食建议</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3>社区互动</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'FoodApp:groups' %}">群组</a></li>
+                        <li><a href="{% url 'FoodApp:health_challenges' %}">健康挑战</a></li>
+                        <li><a href="{% url 'FoodApp:activity_diary' %}">活动日记</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="copyright">
+                <p>&copy; 2025 膳衡方程式. 保留所有权利。</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 移动端菜单切换
+        const mobileToggle = document.getElementById('mobileToggle');
+        const navMenu = document.getElementById('navMenu');
+
+        mobileToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+
+        // 点击菜单项后关闭移动端菜单
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+            });
+        });
+
+        // 点击头像跳转到个人主页
+        document.querySelectorAll('.user-avatar').forEach(avatar => {
+            avatar.addEventListener('click', () => {
+                window.location.href = "{% url 'FoodApp:profile' %}";
+            });
+        });
+
+        // 添加下拉菜单功能
+        document.querySelectorAll('.dropdown > .nav-link').forEach(dropdownLink => {
+            dropdownLink.addEventListener('click', function(e) {
+                // 阻止链接的默认行为
+                e.preventDefault();
+
+                // 获取当前下拉菜单的父元素
+                const dropdown = this.parentElement;
+
+                // 切换当前下拉菜单的激活状态
+                dropdown.classList.toggle('active');
+
+                // 关闭其他下拉菜单
+                document.querySelectorAll('.dropdown').forEach(otherDropdown => {
+                    if (otherDropdown !== dropdown) {
+                        otherDropdown.classList.remove('active');
+                    }
+                });
+            });
+        });
+
+        // 点击页面其他地方时关闭下拉菜单
+        document.addEventListener('click', function(e) {
+            // 检查点击是否在下拉菜单内部
+            if (!e.target.closest('.dropdown')) {
+                // 关闭所有下拉菜单
+                document.querySelectorAll('.dropdown').forEach(dropdown => {
+                    dropdown.classList.remove('active');
+                });
+            }
+        });
+
+        // 添加延迟显示子菜单的逻辑
+        document.querySelectorAll('.dropdown').forEach(dropdown => {
+            let timeoutId;
+
+            dropdown.addEventListener('mouseenter', () => {
+                clearTimeout(timeoutId);
+                const dropdownContent = dropdown.querySelector('.dropdown-content');
+                if (dropdownContent) {
+                    dropdownContent.style.display = 'block';
+                    setTimeout(() => {
+                        dropdownContent.style.opacity = '1';
+                        dropdownContent.style.transform = 'translateY(0)';
+                    }, 50);
+                }
+            });
+
+            dropdown.addEventListener('mouseleave', () => {
+                timeoutId = setTimeout(() => {
+                    const dropdownContent = dropdown.querySelector('.dropdown-content');
+                    if (dropdownContent) {
+                        dropdownContent.style.opacity = '0';
+                        dropdownContent.style.transform = 'translateY(-10px)';
+                        setTimeout(() => {
+                            dropdownContent.style.display = 'none';
+                        }, 300);
+                    }
+                }, 300);
+            });
+
+            // 为子菜单添加事件监听器
+            const dropdownContent = dropdown.querySelector('.dropdown-content');
+            if (dropdownContent) {
+                dropdownContent.addEventListener('mouseenter', () => {
+                    clearTimeout(timeoutId);
+                });
+
+                dropdownContent.addEventListener('mouseleave', () => {
+                    timeoutId = setTimeout(() => {
+                        dropdownContent.style.opacity = '0';
+                        dropdownContent.style.transform = 'translateY(-10px)';
+                        setTimeout(() => {
+                            dropdownContent.style.display = 'none';
+                        }, 300);
+                    }, 300);
+                });
+            }
+        });
+
+        // 头像上传预览功能已移除，使用initAvatarUpload代替
+
+        // 添加即时头像上传功能
+        function uploadAvatar() {
+            const fileInput = document.getElementById('avatarInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('请选择一个图片文件');
+                return;
+            }
+            
+            // 验证文件类型
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+            if (!allowedTypes.includes(file.type)) {
+                alert('只允许上传 JPG、PNG 或 GIF 格式的图片');
+                return;
+            }
+            
+            // 验证文件大小 (最大5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('图片大小不能超过 5MB');
+                return;
+            }
+            
+            // 创建 FormData 对象
+            const formData = new FormData();
+            formData.append('avatar', file);
+            formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+            
+            // 显示上传指示器
+            const avatarContainer = document.querySelector('.avatar-container');
+            const profileAvatar = document.querySelector('.profile-avatar');
+            const uploadIndicator = document.createElement('div');
+            uploadIndicator.className = 'upload-indicator';
+            uploadIndicator.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 上传中...';
+            avatarContainer.appendChild(uploadIndicator);
+            
+            // 隐藏原始头像
+            if (profileAvatar) {
+                profileAvatar.style.display = 'none';
+            }
+            
+            // 发送 AJAX 请求
+            fetch("{% url 'FoodApp:update_profile' %}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                // 检查响应是否为JSON格式
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    return response.json();
+                } else {
+                    // 如果不是JSON响应，抛出错误
+                    throw new Error('服务器返回了意外的响应格式');
+                }
+            })
+            .then(data => {
+                // 移除上传指示器
+                if (uploadIndicator.parentNode) {
+                    avatarContainer.removeChild(uploadIndicator);
+                }
+                
+                // 显示原始头像
+                if (profileAvatar) {
+                    profileAvatar.style.display = '';
+                }
+                
+                if (data.success) {
+                    // 更新页面上的头像
+                    let profileAvatar = document.querySelector('.profile-avatar');
+                    if (!profileAvatar) {
+                        profileAvatar = document.createElement('img');
+                        profileAvatar.className = 'profile-avatar';
+                        profileAvatar.alt = '头像';
+                        avatarContainer.insertBefore(profileAvatar, avatarContainer.firstChild);
+                    }
+                    profileAvatar.src = data.avatar_url;
+                    
+                    // 更新导航栏中的头像
+                    const navAvatars = document.querySelectorAll('.user-avatar');
+                    navAvatars.forEach(navAvatar => {
+                        // 检查是否是img元素
+                        if (navAvatar.tagName === 'IMG') {
+                            navAvatar.src = data.avatar_url;
+                        } else {
+                            // 如果是div元素，则替换为img元素
+                            const newAvatar = document.createElement('img');
+                            newAvatar.src = data.avatar_url;
+                            newAvatar.className = 'user-avatar';
+                            newAvatar.alt = '头像';
+                            newAvatar.style.cssText = navAvatar.style.cssText;
+                            newAvatar.addEventListener('click', () => {
+                                window.location.href = "{% url 'FoodApp:profile' %}";
+                            });
+                            navAvatar.parentNode.replaceChild(newAvatar, navAvatar);
+                        }
+                    });
+                    
+                    // 显示成功消息
+                    showMessage(data.message, 'success');
+                } else {
+                    // 显示错误消息
+                    showMessage(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                // 移除上传指示器
+                if (uploadIndicator.parentNode) {
+                    avatarContainer.removeChild(uploadIndicator);
+                }
+                
+                // 显示原始头像
+                if (profileAvatar) {
+                    profileAvatar.style.display = '';
+                }
+                
+                // 显示错误消息
+                showMessage('上传失败: ' + error.message, 'error');
+            });
+        }
+        
+        // 显示消息函数
+        function showMessage(message, type) {
+            // 移除已存在的消息
+            const existingMessages = document.querySelectorAll('.message');
+            existingMessages.forEach(msg => msg.remove());
+            
+            // 创建新消息
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.innerHTML = `<i class="fas fa-info-circle"></i> ${message}`;
+            
+            // 插入到页面顶部
+            const container = document.querySelector('.container');
+            container.insertBefore(messageDiv, container.firstChild);
+            
+            // 3秒后自动隐藏消息
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.remove();
+                }
+            }, 3000);
+        }
+        
+        // 切换选项卡
+        function switchTab(tabName) {
+            // 隐藏所有选项卡内容
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // 移除所有选项卡按钮的活动状态
+            document.querySelectorAll('.tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // 显示选中的选项卡内容
+            document.getElementById(tabName).classList.add('active');
+
+            // 为选中的选项卡按钮添加活动状态
+            event.currentTarget.classList.add('active');
+        }
+
+        // 表单验证
+        function validateForm(formId) {
+            const form = document.getElementById(formId);
+            if (formId === 'profileForm') {
+                const fullName = document.getElementById('full_name').value.trim();
+                const email = document.getElementById('email').value.trim();
+
+                if (!fullName) {
+                    alert('请输入姓名');
+                    return false;
+                }
+
+                if (!email) {
+                    alert('请输入邮箱');
+                    return false;
+                }
+
+                // 简单邮箱格式验证
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    alert('请输入有效的邮箱地址');
+                    return false;
+                }
+            } else if (formId === 'passwordForm') {
+                const oldPassword = document.getElementById('old_password').value;
+                const newPassword = document.getElementById('new_password').value;
+                const confirmPassword = document.getElementById('confirm_password').value;
+
+                if (!oldPassword || !newPassword || !confirmPassword) {
+                    alert('请填写所有密码字段');
+                    return false;
+                }
+
+                if (newPassword !== confirmPassword) {
+                    alert('新密码和确认密码不一致');
+                    return false;
+                }
+
+                if (newPassword.length < 6) {
+                    alert('密码长度至少为6位');
+                    return false;
+                }
+            } else if (formId === 'planForm') {
+                const goalType = document.getElementById('goal_type').value;
+                const targetWeight = document.getElementById('target_weight').value;
+                const targetDate = document.getElementById('target_date').value;
+                const dailyCalorieGoal = document.getElementById('daily_calorie_goal').value;
+
+                if (!goalType) {
+                    alert('请选择目标类型');
+                    return false;
+                }
+
+                if (!targetWeight || isNaN(targetWeight) || parseFloat(targetWeight) <= 0) {
+                    alert('请输入有效的目标体重');
+                    return false;
+                }
+
+                if (!targetDate) {
+                    alert('请选择目标日期');
+                    return false;
+                }
+
+                if (!dailyCalorieGoal || isNaN(dailyCalorieGoal) || parseFloat(dailyCalorieGoal) <= 0) {
+                    alert('请输入有效的每日热量目标');
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        // 重置表单
+        function resetForm(formId) {
+            document.getElementById(formId).reset();
+        }
+        
+        // 验证密码修改表单
+        function validatePasswordForm() {
+            const currentPassword = document.getElementById('current_password').value;
+            const newPassword = document.getElementById('new_password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                alert('请填写所有密码字段');
+                return false;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                alert('新密码和确认密码不一致');
+                return false;
+            }
+            
+            if (newPassword.length < 6) {
+                alert('密码长度至少为6位');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // 切换密码表单显示
+        document.getElementById('togglePasswordForm').addEventListener('click', function() {
+            const form = document.getElementById('passwordChangeForm');
+            form.classList.toggle('show');
+            
+            // 更改按钮文本
+            if (form.classList.contains('show')) {
+                this.innerHTML = '<i class="fas fa-times"></i> 取消修改';
+            } else {
+                this.innerHTML = '<i class="fas fa-edit"></i> 修改密码';
+                // 清空表单
+                document.getElementById('current_password').value = '';
+                document.getElementById('new_password').value = '';
+                document.getElementById('confirm_password').value = '';
+            }
+        });
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化选项卡
+            switchTab('info');
+            
+            // 初始化头像上传功能
+            initAvatarUpload();
+        });
+
+        // 初始化头像上传功能
+        function initAvatarUpload() {
+            const avatarInput = document.getElementById('avatarInput');
+            if (avatarInput) {
+                avatarInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            // 更新头像容器
+                            const avatarContainer = document.querySelector('.avatar-container');
+                            // 移除现有的头像图片（如果有）
+                            const existingAvatar = avatarContainer.querySelector('.profile-avatar');
+                            if (existingAvatar) {
+                                existingAvatar.remove();
+                            }
+                            
+                            // 创建新的头像元素
+                            const newAvatar = document.createElement('img');
+                            newAvatar.className = 'profile-avatar';
+                            newAvatar.src = event.target.result;
+                            newAvatar.alt = '头像预览';
+                            
+                            // 插入到容器中
+                            avatarContainer.insertBefore(newAvatar, avatarContainer.firstChild);
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+        }
+
+        // 添加延迟显示子菜单的逻辑
+        document.querySelectorAll('.dropdown').forEach(dropdown => {
+            let timeoutId;
+
+            dropdown.addEventListener('mouseenter', () => {
+                clearTimeout(timeoutId);
+                const dropdownContent = dropdown.querySelector('.dropdown-content');
+                if (dropdownContent) {
+                    dropdownContent.style.display = 'block';
+                    setTimeout(() => {
+                        dropdownContent.style.opacity = '1';
+                        dropdownContent.style.transform = 'translateY(0)';
+                    }, 50);
+                }
+            });
+
+            dropdown.addEventListener('mouseleave', () => {
+                timeoutId = setTimeout(() => {
+                    const dropdownContent = dropdown.querySelector('.dropdown-content');
+                    if (dropdownContent) {
+                        dropdownContent.style.opacity = '0';
+                        dropdownContent.style.transform = 'translateY(-10px)';
+                        setTimeout(() => {
+                            dropdownContent.style.display = 'none';
+                        }, 300);
+                    }
+                }, 300);
+            });
+        });
+    </script>
+</body>
+</html>

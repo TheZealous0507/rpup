@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>膳食建议 - 膳衡方程式</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-dark: #3a56d4;
+            --primary-light: #edf2ff;
+            --secondary-color: #3f37c9;
+            --accent-color: #4cc9f0;
+            --dark-color: #35424a;
+            --light-color: #f4f4f4;
+            --success-color: #4caf50;
+            --danger-color: #f44336;
+            --warning-color: #ff9800;
+            --info-color: #2196f3;
+            --border-color: #ddd;
+            --text-color: #333;
+            --text-light: #777;
+            --shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --pulse-animation: pulse 2s infinite;
+            --bounce-animation: bounce 2s infinite;
+            --float-animation: float 3s ease-in-out infinite;
+        }
+        
+        .suggestion-header {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .suggestion-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .suggestion-title {
+            font-size: 2rem;
+            color: var(--dark-color);
+            margin-bottom: 1rem;
+        }
+        
+        .suggestion-description {
+            color: #666;
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .suggestion-content {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--dark-color);
+            margin: 2rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+        
+        .recommendations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .recommendation-card {
+            background: var(--primary-light);
+            border-radius: 10px;
+            padding: 1.5rem;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .recommendation-title {
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .recommendation-content {
+            line-height: 1.7;
+        }
+        
+        .meal-foods h3 {
+            margin: 1rem 0 0.5rem;
+            color: var(--dark-color);
+        }
+        
+        .food-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 1rem;
+        }
+        
+        .food-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e1e8ed;
+        }
+        
+        .food-item:last-child {
+            border-bottom: none;
+        }
+        
+        .food-name {
+            flex: 2;
+            font-weight: 500;
+        }
+        
+        .food-amount {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .food-calories {
+            flex: 1;
+            text-align: right;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .meal-total-calories {
+            text-align: right;
+            padding: 0.5rem 0;
+            border-top: 2px solid var(--primary-color);
+            margin-top: 0.5rem;
+        }
+        
+        .nutritional-info {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px dashed #ccc;
+        }
+        
+        .nutritional-info h4 {
+            margin: 0 0 0.5rem;
+            color: var(--dark-color);
+        }
+        
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .tip-card {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            border-radius: 10px;
+            padding: 1.5rem;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .tip-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .tip-content {
+            line-height: 1.6;
+        }
+        
+        .warning-card {
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            border-radius: 10px;
+            padding: 1.5rem;
+            border-left: 4px solid #ff9800;
+            margin-bottom: 2rem;
+        }
+        
+        .warning-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .warning-content {
+            line-height: 1.6;
+        }
+        
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .no-suggestion {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+        
+        .no-suggestion i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #ccc;
+        }
+        
+        /* 表单样式 */
+        .suggestion-form {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+        
+        .form-select, .form-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        
+
+        @media (max-width: 768px) {
+            .mobile-toggle {
+                display: block;
+            }
+
+            .nav-menu {
+                position: fixed;
+                top: 70px;
+                left: -100%;
+                flex-direction: column;
+                background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+                width: 100%;
+                text-align: center;
+                transition: var(--transition);
+                padding: 2rem 0;
+                box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .nav-menu.active {
+                left: 0;
+            }
+
+            .nav-item {
+                margin: 1rem 0;
+            }
+
+            .nav-user {
+                flex-direction: column;
+            }
+
+            .user-avatar {
+                margin-right: 0;
+                margin-bottom: 1rem;
+            }
+
+            .dropdown-content {
+                position: static;
+                display: none;
+                box-shadow: none;
+                background: rgba(255, 255, 255, 0.1);
+                margin-top: 0.5rem;
+            }
+
+            .dropdown:hover .dropdown-content {
+                display: none;
+            }
+
+            .dropdown.active .dropdown-content {
+                display: block;
+            }
+
+            .page-header h1 {
+                font-size: 2rem;
+            }
+
+            .page-header p {
+                font-size: 1rem;
+            }
+
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .meal-buttons {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+            }
+        }
+
+        /* 导航栏样式 */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 0;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .navbar-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 700;
+            animation: var(--pulse-animation);
+        }
+
+        .logo-icon {
+            margin-right: 10px;
+            color: var(--accent-color);
+            animation: rotate 3s linear infinite;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-left: 1.5rem;
+            position: relative;
+            animation: fadeIn 0.5s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .nav-item:nth-child(1) { animation-delay: 0.1s; }
+        .nav-item:nth-child(2) { animation-delay: 0.2s; }
+        .nav-item:nth-child(3) { animation-delay: 0.3s; }
+        .nav-item:nth-child(4) { animation-delay: 0.4s; }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .nav-link:hover::before {
+            left: 100%;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-link i {
+            margin-right: 0.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link:hover i {
+            transform: scale(1.2);
+        }
+
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background: white;
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            z-index: 1;
+            top: 100%;
+            left: 0;
+            padding: 0.5rem 0;
+            margin-top: 0.5rem;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-content a {
+            color: var(--dark-color);
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dropdown-content a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(67, 97, 238, 0.1), transparent);
+            transition: 0.5s;
+        }
+
+        .dropdown-content a:hover::before {
+            left: 100%;
+        }
+
+        .dropdown-content a i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .dropdown-content a:hover {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            transform: translateX(5px);
+        }
+
+        .dropdown-content a:hover i {
+            transform: translateX(3px);
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 1rem;
+            object-fit: cover;
+            border: 2px solid white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: var(--float-animation);
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+
+        .btn {
+            display: inline-block;
+            background: white;
+            color: var(--primary-color);
+            padding: 10px 20px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-outline:hover {
+            background: white;
+            color: var(--primary-color);
+        }
+
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .mobile-toggle:hover {
+            transform: rotate(90deg);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <div class="navbar-container">
+                <a href="{% url 'FoodApp:index' %}" class="logo">
+                    <i class="fas fa-utensils logo-icon"></i>
+                    膳衡方程式
+                </a>
+                
+                <ul class="nav-menu" id="navMenu">
+                    <li class="nav-item">
+                        <a href="{% url 'FoodApp:index' %}" class="nav-link"><i class="fas fa-home"></i> 首页</a>
+                    </li>
+                    
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link"><i class="fas fa-utensils"></i> 饮食追踪 <i class="fas fa-chevron-down" style="font-size: 0.8rem; margin-left: 0.5rem;"></i></a>
+                        <div class="dropdown-content">
+                            <a href="{% url 'FoodApp:food_search' %}"><i class="fas fa-search"></i> 食物查询</a>
+                            <a href="{% url 'FoodApp:food_image_recognition' %}"><i class="fas fa-camera"></i> 图片识别</a>
+                            <a href="{% url 'FoodApp:add_meal' %}"><i class="fas fa-plus-circle"></i> 添加餐食</a>
+                            <a href="{% url 'FoodApp:nutrition_analysis' %}"><i class="fas fa-chart-pie"></i> 营养分析</a>
+                            <a href="{% url 'FoodApp:recipe_suggestion' %}"><i class="fas fa-book"></i> 食谱推荐</a>
+                            <a href="{% url 'FoodApp:meal_suggestion' %}"><i class="fas fa-lightbulb"></i> 膳食建议</a>
+                            <a href="{% url 'FoodApp:add_food' %}"><i class="fas fa-utensils"></i> 添加食物</a>
+                        </div>
+                    </li>
+                    
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link"><i class="fas fa-users"></i> 社区互动 <i class="fas fa-chevron-down" style="font-size: 0.8rem; margin-left: 0.5rem;"></i></a>
+                        <div class="dropdown-content">
+                            <a href="{% url 'FoodApp:groups' %}"><i class="fas fa-users"></i> 群组</a>
+                            <a href="{% url 'FoodApp:health_challenges' %}"><i class="fas fa-trophy"></i> 健康挑战</a>
+                            <a href="{% url 'FoodApp:activity_diary' %}"><i class="fas fa-calendar-alt"></i> 活动日记</a>
+                        </div>
+                    </li>
+                    
+                    {% if user_id %}
+                    <li class="nav-item nav-user">
+                        {% if avatar %}
+                            {{ avatar|safe }}
+                        {% else %}
+                            <div class="user-avatar" style="display: flex; align-items: center; justify-content: center; background: var(--accent-color);">
+                                <i class="fas fa-user" style="color: white;"></i>
+                            </div>
+                        {% endif %}
+                        <a href="{% url 'FoodApp:logout' %}" class="btn btn-outline">退出</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a href="{% url 'FoodApp:login' %}" class="btn">登录</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{% url 'FoodApp:register' %}" class="btn" style="margin-right: 10px;">注册</a>
+                    </li>
+                    {% endif %}
+                </ul>
+                
+                <button class="mobile-toggle" id="mobileToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="page-title">
+            <h1><i class="fas fa-utensils"></i> 膳食建议</h1>
+            <p>根据您的健康数据提供个性化膳食建议</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message {{ message.tags }}"><i class="fas fa-info-circle"></i> {{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="suggestion-header">
+            <div class="suggestion-icon">
+                <i class="fas fa-utensils"></i>
+            </div>
+            <h1 class="suggestion-title">个性化膳食建议</h1>
+            <p class="suggestion-description">
+                告诉我们您的需求，我们将为您提供专业的膳食建议，帮助您更好地管理营养摄入，实现健康目标。
+            </p>
+        </div>
+
+        <!-- 用户输入表单 -->
+        <div class="suggestion-form">
+            <h2 class="section-title"><i class="fas fa-edit"></i> 告诉我们您的需求</h2>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label class="form-label" for="meal_type">餐次类型</label>
+                    <select class="form-select" id="meal_type" name="meal_type" required>
+                        <option value="">请选择餐次类型</option>
+                        <option value="Breakfast" {% if meal_type == 'Breakfast' %}selected{% endif %}>早餐</option>
+                        <option value="Lunch" {% if meal_type == 'Lunch' %}selected{% endif %}>午餐</option>
+                        <option value="Dinner" {% if meal_type == 'Dinner' %}selected{% endif %}>晚餐</option>
+                        <option value="Snack" {% if meal_type == 'Snack' %}selected{% endif %}>加餐</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="mood">当前心情</label>
+                    <select class="form-select" id="mood" name="mood">
+                        <option value="">请选择当前心情（可选）</option>
+                        <option value="开心" {% if mood == '开心' %}selected{% endif %}>开心</option>
+                        <option value="疲惫" {% if mood == '疲惫' %}selected{% endif %}>疲惫</option>
+                        <option value="压力大" {% if mood == '压力大' %}selected{% endif %}>压力大</option>
+                        <option value="焦虑" {% if mood == '焦虑' %}selected{% endif %}>焦虑</option>
+                        <option value="平静" {% if mood == '平静' %}selected{% endif %}>平静</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="additional_info">其他需求或偏好</label>
+                    <textarea class="form-textarea" id="additional_info" name="additional_info" placeholder="例如：想要增肌/减脂、有食物过敏、喜欢的菜系、忌口等...">{{ additional_info }}</textarea>
+                </div>
+                
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-paper-plane"></i> 获取膳食建议
+                </button>
+            </form>
+        </div>
+
+        {% if suggestion %}
+        <div class="suggestion-content">
+            {% if suggestion.meals %}
+            <h2 class="section-title"><i class="fas fa-utensils"></i> 餐食推荐</h2>
+            <div class="recommendations-grid">
+                {% for meal in suggestion.meals %}
+                <div class="recommendation-card">
+                    <div class="recommendation-title">
+                        <i class="fas fa-utensils"></i>
+                        {{ meal.name }}
+                    </div>
+                    <div class="recommendation-content">
+                        <div class="meal-foods">
+                            <h3>食物组成:</h3>
+                            <ul class="food-list">
+                                {% for food in meal.foods %}
+                                <li class="food-item">
+                                    <span class="food-name">{{ food.name }}</span>
+                                    <span class="food-amount">{{ food.amount }}</span>
+                                    <span class="food-calories">{{ food.calories }} 千卡</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            <div class="meal-total-calories">
+                                <strong>本餐总热量: {{ meal.total_calories }} 千卡</strong>
+                            </div>
+                            {% if meal.nutritional_info %}
+                            <div class="nutritional-info">
+                                <h4>营养分析:</h4>
+                                <p>{{ meal.nutritional_info }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if suggestion.tips %}
+            <h2 class="section-title"><i class="fas fa-lightbulb"></i> 健康小贴士</h2>
+            <div class="tips-grid">
+                {% for tip in suggestion.tips %}
+                <div class="tip-card">
+                    <div class="tip-title">
+                        <i class="fas fa-lightbulb"></i>
+                        小贴士 {{ forloop.counter }}
+                    </div>
+                    <div class="tip-content">
+                        {{ tip }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if suggestion.warnings %}
+            <h2 class="section-title"><i class="fas fa-exclamation-triangle"></i> 注意事项</h2>
+            {% for warning in suggestion.warnings %}
+            <div class="warning-card">
+                <div class="warning-title">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    注意事项 {{ forloop.counter }}
+                </div>
+                <div class="warning-content">
+                    {{ warning }}
+                </div>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+        {% elif not suggestion and request.method == 'POST' %}
+        <div class="no-suggestion">
+            <i class="fas fa-utensils"></i>
+            <h3>暂无膳食建议</h3>
+            <p>请稍后重试或调整您的需求</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h3>膳衡方程式</h3>
+                    <p>您的个人健康饮食管理助手，致力于帮助每个人实现健康的生活方式。</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>核心功能</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'FoodApp:index' %}">首页</a></li>
+                        <li><a href="{% url 'FoodApp:food_search' %}">食物查询</a></li>
+                        <li><a href="{% url 'FoodApp:food_image_recognition' %}">图片识别</a></li>
+                        <li><a href="{% url 'FoodApp:add_meal' %}">添加餐食</a></li>
+                        <li><a href="{% url 'FoodApp:nutrition_analysis' %}">营养分析</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>智能推荐</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'FoodApp:recipe_suggestion' %}">食谱推荐</a></li>
+                        <li><a href="{% url 'FoodApp:meal_suggestion' %}">膳食建议</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>社区互动</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'FoodApp:groups' %}">群组</a></li>
+                        <li><a href="{% url 'FoodApp:health_challenges' %}">健康挑战</a></li>
+                        <li><a href="{% url 'FoodApp:activity_diary' %}">活动日记</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2025 膳衡方程式. 保留所有权利。</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+
+
+        // 移动端菜单切换
+        const mobileToggle = document.getElementById('mobileToggle');
+        const navMenu = document.getElementById('navMenu');
+
+        mobileToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+
+        // 点击菜单项后关闭移动端菜单
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+            });
+        });
+
+        // 点击头像跳转到个人主页
+        document.querySelectorAll('.user-avatar').forEach(avatar => {
+            avatar.addEventListener('click', () => {
+                window.location.href = "{% url 'FoodApp:profile' %}";
+            });
+        });
+
+        // 添加下拉菜单功能
+        document.querySelectorAll('.dropdown > .nav-link').forEach(dropdownLink => {
+            dropdownLink.addEventListener('click', function(e) {
+                // 阻止链接的默认行为
+                e.preventDefault();
+
+                // 获取当前下拉菜单的父元素
+                const dropdown = this.parentElement;
+
+                // 切换当前下拉菜单的激活状态
+                dropdown.classList.toggle('active');
+
+                // 关闭其他下拉菜单
+                document.querySelectorAll('.dropdown').forEach(otherDropdown => {
+                    if (otherDropdown !== dropdown) {
+                        otherDropdown.classList.remove('active');
+                    }
+                });
+            });
+        });
+
+        // 点击页面其他地方时关闭下拉菜单
+        document.addEventListener('click', function(e) {
+            // 检查点击是否在下拉菜单内部
+            if (!e.target.closest('.dropdown')) {
+                // 关闭所有下拉菜单
+                document.querySelectorAll('.dropdown').forEach(dropdown => {
+                    dropdown.classList.remove('active');
+                });
+            }
+        });
+
+        // 添加延迟显示子菜单的逻辑
+        document.querySelectorAll('.dropdown').forEach(dropdown => {
+            let timeoutId;
+            
+            dropdown.addEventListener('mouseenter', () => {
+                clearTimeout(timeoutId);
+                const dropdownContent = dropdown.querySelector('.dropdown-content');
+                if (dropdownContent) {
+                    dropdownContent.style.display = 'block';
+                    setTimeout(() => {
+                        dropdownContent.style.opacity = '1';
+                        dropdownContent.style.transform = 'translateY(0)';
+                    }, 50);
+                }
+            });
+            
+            dropdown.addEventListener('mouseleave', () => {
+                timeoutId = setTimeout(() => {
+                    const dropdownContent = dropdown.querySelector('.dropdown-content');
+                    if (dropdownContent) {
+                        dropdownContent.style.opacity = '0';
+                        dropdownContent.style.transform = 'translateY(-10px)';
+                        setTimeout(() => {
+                            dropdownContent.style.display = 'none';
+                        }, 400);
+                    }
+                }, 400);
+            });
+            
+            // 为子菜单添加事件监听器
+            const dropdownContent = dropdown.querySelector('.dropdown-content');
+            if (dropdownContent) {
+                dropdownContent.addEventListener('mouseenter', () => {
+                    clearTimeout(timeoutId);
+                });
+                
+                dropdownContent.addEventListener('mouseleave', () => {
+                    timeoutId = setTimeout(() => {
+                        dropdownContent.style.opacity = '0';
+                        dropdownContent.style.transform = 'translateY(-10px)';
+                        setTimeout(() => {
+                            dropdownContent.style.display = 'none';
+                        }, 400);
+                    }, 400);
+                });
+            }
+        });
+        
+        // 移动端下拉菜单切换
+        document.querySelectorAll('.dropdown').forEach(dropdown => {
+            dropdown.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768) {
+                    e.stopPropagation();
+                    dropdown.classList.toggle('active');
+                }
+            });
+        });
+        
+        // 点击页面其他地方关闭下拉菜单
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768) {
+                document.querySelectorAll('.dropdown').forEach(dropdown => {
+                    if (!dropdown.contains(e.target)) {
+                        dropdown.classList.remove('active');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>热量计算器 - 膳衡方程式</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-dark: #3a56d4;
+            --primary-light: #edf2ff;
+            --secondary-color: #3f37c9;
+            --accent-color: #4cc9f0;
+            --dark-color: #35424a;
+            --light-color: #f4f4f4;
+            --success-color: #4caf50;
+            --danger-color: #f44336;
+            --warning-color: #ff9800;
+            --info-color: #2196f3;
+            --border-color: #ddd;
+            --text-color: #333;
+            --text-light: #777;
+            --shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --pulse-animation: pulse 2s infinite;
+            --bounce-animation: bounce 2s infinite;
+            --float-animation: float 3s ease-in-out infinite;
+        }
+        
+        .calculator-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .calculator-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .calculator-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .calculator-title {
+            font-size: 2rem;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .calculator-description {
+            color: #666;
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .result-section {
+            background: linear-gradient(135deg, var(--primary-light), #e0e7ff);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-top: 2rem;
+            text-align: center;
+            display: none;
+        }
+        
+        .result-title {
+            font-size: 1.5rem;
+            color: var(--dark-color);
+            margin-bottom: 1rem;
+        }
+        
+        .result-value {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 1rem 0;
+        }
+        
+        .result-unit {
+            font-size: 1.2rem;
+            color: #666;
+        }
+        
+        .explanation {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            text-align: left;
+        }
+        
+        .explanation-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .explanation-content {
+            line-height: 1.7;
+        }
+        
+        .activity-levels {
+            margin-top: 2rem;
+        }
+        
+        .levels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .level-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+        
+        .level-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+        
+        .level-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .level-description {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <div class="navbar-container">
+                <a href="{% url 'FoodApp:index' %}" class="logo">
+                    <i class="fas fa-utensils logo-icon"></i>
+                    膳衡方程式
+                </a>
+                
+                <ul class="nav-menu" id="navMenu">
+                    <li class="nav-item">
+                        <a href="{% url 'FoodApp:index' %}" class="nav-link"><i class="fas fa-home"></i> 首页</a>
+                    </li>
+                    
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link"><i class="fas fa-utensils"></i> 饮食追踪 <i class="fas fa-chevron-down" style="font-size: 0.8rem; margin-left: 0.5rem;"></i></a>
+                        <div class="dropdown-content">
+                            <a href="{% url 'FoodApp:food_search' %}"><i class="fas fa-search"></i> 食物查询</a>
+                            <a href="{% url 'FoodApp:food_image_recognition' %}"><i class="fas fa-camera"></i> 图片识别</a>
+                            <a href="{% url 'FoodApp:add_meal' %}"><i class="fas fa-plus-circle"></i> 添加餐食</a>
+                            <a href="{% url 'FoodApp:nutrition_analysis' %}"><i class="fas fa-chart-pie"></i> 营养分析</a>
+                            <a href="{% url 'FoodApp:recipe_suggestion' %}"><i class="fas fa-book"></i> 食谱推荐</a>
+                            <a href="{% url 'FoodApp:meal_suggestion' %}"><i class="fas fa-lightbulb"></i> 膳食建议</a>
+                            <a href="{% url 'FoodApp:add_food' %}"><i class="fas fa-utensils"></i> 添加食物</a>
+                        </div>
+                    </li>
+                    
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link"><i class="fas fa-users"></i> 社区互动 <i class="fas fa-chevron-down" style="font-size: 0.8rem; margin-left: 0.5rem;"></i></a>
+                        <div class="dropdown-content">
+                            <a href="{% url 'FoodApp:groups' %}"><i class="fas fa-users"></i> 群组</a>
+                            <a href="#"><i class="fas fa-trophy"></i> 健康挑战</a>
+                            <a href="#"><i class="fas fa-calendar-alt"></i> 活动日历</a>
+                        </div>
+                    </li>
+                    
+                    {% if user_id %}
+                    <li class="nav-item nav-user">
+                        {% if avatar %}
+                            {{ avatar|safe }}
+                        {% else %}
+                            <div class="user-avatar" style="display: flex; align-items: center; justify-content: center; background: var(--accent-color);">
+                                <i class="fas fa-user" style="color: white;"></i>
+                            </div>
+                        {% endif %}
+                        <a href="{% url 'FoodApp:logout' %}" class="btn btn-outline">退出</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a href="{% url 'FoodApp:login' %}" class="btn">登录</a>
+                    </li>
+                    {% endif %}
+                </ul>
+                
+                <button class="mobile-toggle" id="mobileToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="page-title">
+            <h1><i class="fas fa-calculator"></i> 热量计算器</h1>
+            <p>计算您的基础代谢率和每日热量需求</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message {{ message.tags }}"><i class="fas fa-info-circle"></i> {{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="calculator-container">
+            <div class="calculator-header">
+                <div class="calculator-icon">
+                    <i class="fas fa-calculator"></i>
+                </div>
+                <h1 class="calculator-title">热量需求计算器</h1>
+                <p class="calculator-description">
+                    通过输入您的基本信息，计算您的基础代谢率(BMR)和每日总能量消耗(TDEE)，
+                    帮助您更好地管理体重和营养摄入。
+                </p>
+            </div>
+
+            <form method="POST" id="calculatorForm">
+                {% csrf_token %}
+                <div class="form-grid">
+                    <div>
+                        <div class="form-group">
+                            <label for="gender"><i class="fas fa-venus-mars"></i> 性别</label>
+                            <div class="radio-group">
+                                <div class="radio-item">
+                                    <input type="radio" id="male" name="gender" value="male" required>
+                                    <label for="male">男性</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" id="female" name="gender" value="female" required>
+                                    <label for="female">女性</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="age"><i class="fas fa-birthday-cake"></i> 年龄 (岁)</label>
+                            <input type="number" id="age" name="age" class="form-control" min="15" max="100" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="height"><i class="fas fa-arrows-alt-v"></i> 身高 (cm)</label>
+                            <input type="number" id="height" name="height" class="form-control" min="100" max="250" required>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="form-group">
+                            <label for="weight"><i class="fas fa-weight"></i> 体重 (kg)</label>
+                            <input type="number" id="weight" name="weight" class="form-control" min="30" max="300" step="0.1" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="activity_level"><i class="fas fa-running"></i> 活动水平</label>
+                            <select id="activity_level" name="activity_level" class="form-control" required>
+                                <option value="">请选择您的活动水平</option>
+                                <option value="1.2">久坐不动(办公室工作，很少运动)</option>
+                                <option value="1.375">轻度活动(每周1-3天轻度运动)</option>
+                                <option value="1.55">中度活动(每周3-5天中等强度运动)</option>
+                                <option value="1.725">高度活动(每周6-7天高强度运动)</option>
+                                <option value="1.9">极高活动(每天高强度运动或体力劳动)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="goal"><i class="fas fa-bullseye"></i> 健康目标</label>
+                            <select id="goal" name="goal" class="form-control" required>
+                                <option value="">请选择您的健康目标</option>
+                                <option value="lose">减重</option>
+                                <option value="maintain">维持体重</option>
+                                <option value="gain">增重</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button type="submit" class="btn">
+                        <i class="fas fa-calculator"></i> 计算热量需求
+                    </button>
+                    <button type="reset" class="btn btn-outline">
+                        <i class="fas fa-redo"></i> 重置表单
+                    </button>
+                </div>
+            </form>
+
+            {% if result %}
+            <div id="resultSection" class="result-section">
+                <h2 class="result-title">计算结果</h2>
+                <div class="result-value">{{ result.tdee|floatformat:0 }}</div>
+                <div class="result-unit">千卡/天</div>
+                
+                <div class="explanation">
+                    <div class="explanation-title">
+                        <i class="fas fa-info-circle"></i>
+                        结果说明
+                    </div>
+                    <div class="explanation-content">
+                        <p><strong>基础代谢率(BMR):</strong> {{ result.bmr|floatformat:0 }} 千卡/天 - 这是您在完全休息状态下身体维持基本功能所需的能量。</p>
+                        <p><strong>总日常能量消耗(TDEE):</strong> {{ result.tdee|floatformat:0 }} 千卡/天 - 这是您在当前活动水平下每天消耗的总能量。</p>
+                        <p><strong>建议热量摄入:</strong> {{ result.recommended_calories|floatformat:0 }} 千卡/天 - 根据您的目标({{ result.goal_chinese }})计算得出的建议热量摄入量。</p>
+                    </div>
+                </div>
+                
+                <div class="activity-levels">
+                    <div class="explanation-title">
+                        <i class="fas fa-running"></i>
+                        不同活动水平的热量需求
+                    </div>
+                    <div class="levels-grid">
+                        <div class="level-card">
+                            <div class="level-title">久坐不动</div>
+                            <div class="level-description">BMR × 1.2</div>
+                        </div>
+                        <div class="level-card">
+                            <div class="level-title">轻度活动</div>
+                            <div class="level-description">BMR × 1.375</div>
+                        </div>
+                        <div class="level-card">
+                            <div class="level-title">中度活动</div>
+                            <div class="level-description">BMR × 1.55</div>
+                        </div>
+                        <div class="level-card">
+                            <div class="level-title">高度活动</div>
+                            <div class="level-description">BMR × 1.725</div>
+                        </div>
+                        <div class="level-card">
+                            <div class="level-title">极高活动</div>
+                            <div class="level-description">BMR × 1.9</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="btn-group">
+                    <a href="{% url 'FoodApp:add_meal' %}" class="btn">
+                        <i class="fas fa-plus"></i> 记录餐食
+                    </a>
+                    <a href="{% url 'FoodApp:nutrition_analysis' %}" class="btn btn-outline">
+                        <i class="fas fa-chart-pie"></i> 营养分析
+                    </a>
+                </div>
+            </div>
+            
+            <script>
+                // 显示计算结果
+                document.getElementById('resultSection').style.display = 'block';
+            </script>
+            {% endif %}
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h3>膳衡方程式</h3>
+                    <p>您的个人健康饮食管理助手，致力于帮助每个人实现健康的生活方式。</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>核心功能</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'FoodApp:index' %}">首页</a></li>
+                        <li><a href="{% url 'FoodApp:food_search' %}">食物查询</a></li>
+                        <li><a href="{% url 'FoodApp:food_image_recognition' %}">图片识别</a></li>
+                        <li><a href="{% url 'FoodApp:add_meal' %}">添加餐食</a></li>
+                        <li><a href="{% url 'FoodApp:nutrition_analysis' %}">营养分析</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>智能推荐</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'FoodApp:recipe_suggestion' %}">食谱推荐</a></li>
+                        <li><a href="{% url 'FoodApp:meal_suggestion' %}">膳食建议</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>社区互动</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'FoodApp:groups' %}">群组</a></li>
+                        <li><a href="{% url 'FoodApp:health_challenges' %}">健康挑战</a></li>
+                        <li><a href="{% url 'FoodApp:activity_diary' %}">活动日记</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2025 膳衡方程式. 保留所有权利。</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 移动端菜单切换
+        const mobileToggle = document.getElementById('mobileToggle');
+        const navMenu = document.getElementById('navMenu');
+        
+        mobileToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+        
+        // 点击菜单项后关闭移动端菜单
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+            });
+        });
+        
+        // 点击头像跳转到个人主页
+        document.querySelectorAll('.user-avatar').forEach(avatar => {
+            avatar.addEventListener('click', () => {
+                window.location.href = "{% url 'FoodApp:profile' %}";
+            });
+        });
+        
+        // 添加下拉菜单功能
+        document.querySelectorAll('.dropdown > .nav-link').forEach(dropdownLink => {
+            dropdownLink.addEventListener('click', function(e) {
+                // 阻止链接的默认行为
+                e.preventDefault();
+                
+                // 获取当前下拉菜单的父元素
+                const dropdown = this.parentElement;
+                
+                // 切换当前下拉菜单的激活状态
+                dropdown.classList.toggle('active');
+                
+                // 关闭其他下拉菜单
+                document.querySelectorAll('.dropdown').forEach(otherDropdown => {
+                    if (otherDropdown !== dropdown) {
+                        otherDropdown.classList.remove('active');
+                    }
+                });
+            });
+        });
+        
+        // 点击页面其他地方时关闭下拉菜单
+        document.addEventListener('click', function(e) {
+            // 检查点击是否在下拉菜单内部
+            if (!e.target.closest('.dropdown')) {
+                // 关闭所有下拉菜单
+                document.querySelectorAll('.dropdown').forEach(dropdown => {
+                    dropdown.classList.remove('active');
+                });
+            }
+        });
+        
+        // 添加延迟显示子菜单的逻辑
+        document.querySelectorAll('.dropdown').forEach(dropdown => {
+            let timeoutId;
+            
+            dropdown.addEventListener('mouseenter', () => {
+                clearTimeout(timeoutId);
+                const dropdownContent = dropdown.querySelector('.dropdown-content');
+                if (dropdownContent) {
+                    dropdownContent.style.display = 'block';
+                    setTimeout(() => {
+                        dropdownContent.style.opacity = '1';
+                        dropdownContent.style.transform = 'translateY(0)';
+                    }, 50);
+                }
+            });
+            
+            dropdown.addEventListener('mouseleave', () => {
+                timeoutId = setTimeout(() => {
+                    const dropdownContent = dropdown.querySelector('.dropdown-content');
+                    if (dropdownContent) {
+                        dropdownContent.style.opacity = '0';
+                        dropdownContent.style.transform = 'translateY(-10px)';
+                        setTimeout(() => {
+                            dropdownContent.style.display = 'none';
+                        }, 300);
+                    }
+                }, 300);
+            });
+            
+            // 为子菜单添加事件监听器
+            const dropdownContent = dropdown.querySelector('.dropdown-content');
+            if (dropdownContent) {
+                dropdownContent.addEventListener('mouseenter', () => {
+                    clearTimeout(timeoutId);
+                });
+                
+                dropdownContent.addEventListener('mouseleave', () => {
+                    timeoutId = setTimeout(() => {
+                        dropdownContent.style.opacity = '0';
+                        dropdownContent.style.transform = 'translateY(-10px)';
+                        setTimeout(() => {
+                            dropdownContent.style.display = 'none';
+                        }, 300);
+                    }, 300);
+                });
+            }
+        });
+        
+        // 计算基础代谢率和每日热量需求
+        function calculateCalories() {
+            // 获取表单数据
+            const gender = document.getElementById('gender').value;
+            const age = parseInt(document.getElementById('age').value);
+            const height = parseInt(document.getElementById('height').value);
+            const weight = parseInt(document.getElementById('weight').value);
+            const activityLevel = parseFloat(document.getElementById('activity_level').value);
+            
+            // 验证输入
+            if (isNaN(age) || isNaN(height) || isNaN(weight) || age <= 0 || height <= 0 || weight <= 0) {
+                alert('请输入有效的个人信息');
+                return;
+            }
+            
+            // 计算基础代谢率(BMR) - 使用Mifflin-St Jeor公式
+            let bmr;
+            if (gender === 'male') {
+                bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+            } else {
+                bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+            }
+            
+            // 计算每日总能量消耗(TDEE)
+            const tdee = bmr * activityLevel;
+            
+            // 计算不同目标的热量需求
+            const maintain = tdee;
+            const lose = tdee - 500;  // 每周减重约0.5公斤
+            const gain = tdee + 500;   // 每周增重约0.5公斤
+            
+            // 显示结果
+            document.getElementById('bmr-result').textContent = Math.round(bmr);
+            document.getElementById('tdee-result').textContent = Math.round(tdee);
+            document.getElementById('maintain-result').textContent = Math.round(maintain);
+            document.getElementById('lose-result').textContent = Math.round(lose);
+            document.getElementById('gain-result').textContent = Math.round(gain);
+            
+            // 显示结果区域
+            document.getElementById('results').style.display = 'block';
+        }
+        
+        // 重置表单
+        function resetForm() {
+            document.getElementById('calorie-form').reset();
+            document.getElementById('results').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
